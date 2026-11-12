@@ -180,4 +180,806 @@
     .athlete-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 14px
+      gap: 14px;
+    }
+
+    .athlete-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s;
+    }
+
+    .athlete-card:hover {
+      border-color: var(--primary);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .badge-lapis1 { background: #fee2e2; color: #991b1b; }
+    .badge-lapis2 { background: #e0f2fe; color: #075985; }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+
+    .progress-wrap {
+      margin: 10px 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 99px;
+    }
+
+    .progress-fill.ramadhan {
+      background: var(--accent);
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); width: 100%; margin-top: 8px; }
+
+    /* Tabel */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+    }
+
+    /* Modal Grafik Individu */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .close-btn {
+      background: #e2e8f0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .riwayat-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #f8fafc;
+    }
+
+    .riwayat-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🥋 MONITORING ATLET PENCAK SILAT</h1>
+    <p>Program Lari Mingguan (3 KM), Ramadhan Challenge (40 KM) & Kontrol Kelas Berat Badan</p>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 Grafik & Atlet</button>
+    <button class="tab-btn" onclick="switchTab('setoran', this)">🏃 Input Setoran</button>
+    <button class="tab-btn" onclick="switchTab('berat', this)">⚖️ List Berat Badan</button>
+    <button class="tab-btn" onclick="switchTab('aturan', this)">📋 Standar Kelas</button>
+  </nav>
+
+  <div class="container">
+
+    <!-- TAB 1: DASHBOARD & GRAFIK ATLET -->
+    <div id="tab-dashboard" class="section active">
+      <div class="card" style="background: #fffbeb; border-color: #fde68a;">
+        <div style="font-weight: 700; color: #92400e; margin-bottom: 4px;">📅 Target Program Latihan:</div>
+        <ul style="font-size: 0.85rem; color: #78350f; padding-left: 18px; line-height: 1.5;">
+          <li><strong>Program Reguler:</strong> Joging rutin minimal <strong>3 KM / minggu</strong>.</li>
+          <li><strong>Program Khusus Ramadhan (07 Feb – 07 Mar 2027):</strong> Total akumulasi <strong>40 KM dalam 1 bulan</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchAtlet" placeholder="🔍 Cari nama atlet..." oninput="renderAtletCards()">
+        <select id="filterTim" onchange="renderAtletCards()">
+          <option value="ALL">Semua Tim (29 Atlet)</option>
+          <option value="Lapis 1">Tim Lapis 1 (13 Atlet)</option>
+          <option value="Lapis 2">Tim Lapis 2 (16 Atlet)</option>
+        </select>
+      </div>
+
+      <div class="athlete-grid" id="athleteGrid"></div>
+    </div>
+
+    <!-- TAB 2: INPUT SETORAN LARI & UPLOAD SCREENSHOT -->
+    <div id="tab-setoran" class="section">
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">🏃 Setor Progres Lari (Screenshot & Link Strava)</div>
+        
+        <div class="form-group">
+          <label>Pilih Nama Atlet</label>
+          <select id="selectAtletLari"></select>
+        </div>
+
+        <div class="form-group">
+          <label>Jenis Program</label>
+          <select id="jenisProgram">
+            <option value="mingguan">Program Mingguan (Target 3 KM/minggu)</option>
+            <option value="ramadhan">Program Ramadhan (07 Feb - 07 Mar 2027 | Target 40 KM)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Minggu Ke-</label>
+            <select id="mingguKe">
+              <option value="1">Minggu ke-1</option>
+              <option value="2">Minggu ke-2</option>
+              <option value="3">Minggu ke-3</option>
+              <option value="4">Minggu ke-4</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Jarak Lari (KM)</label>
+            <input type="number" id="inputKm" step="0.01" placeholder="Contoh: 3.5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Link Postingan Strava</label>
+          <input type="url" id="inputStrava" placeholder="https://strava.app.link/...">
+        </div>
+
+        <div class="form-group">
+          <label>Upload Screenshot Bukti Strava</label>
+          <div class="upload-box">
+            <span id="labelUpload" style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">
+              📸 Ketuk di sini untuk memilih foto screenshot Strava
+            </span>
+            <input type="file" id="inputFileScreenshot" accept="image/*" onchange="prosesGambar(event)">
+            <img id="previewScreenshot" alt="Pratinjau Screenshot Strava">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="simpanLari()">Simpan Setoran & Update Grafik</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">⚖️ Update Timbangan Berat Badan Atlet</div>
+        <div class="form-group">
+          <label>Pilih Nama Atlet</label>
+          <select id="selectAtletBerat"></select>
+        </div>
+        <div class="form-group">
+          <label>Berat Badan Aktual (KG)</label>
+          <input type="number" id="inputBerat" step="0.1" placeholder="Contoh: 53.5">
+        </div>
+        <button class="btn btn-primary" style="background: var(--secondary);" onclick="simpanBerat()">Simpan Berat Badan</button>
+      </div>
+
+      <!-- Sinkronisasi Data untuk Pelatih/Admin -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 8px;">🔄 Sinkronisasi Data Tim (Publik)</div>
+        <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 10px;">
+          Gunakan tombol di bawah untuk menyalin kode data terbaru atau memuat data dari pelatih agar semua orang melihat pembaruan yang sama.
+        </p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-outline" style="flex: 1; margin: 0;" onclick="eksporData()">📋 Salin Data Tim</button>
+          <button class="btn btn-outline" style="flex: 1; margin: 0;" onclick="imporData()">📥 Tempel Data Tim</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: LIST BERAT BADAN SESUAI KELAS -->
+    <div id="tab-berat" class="section">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚖️ Monitoring Berat Badan & Kelas Tanding</span>
+          <select id="filterTimBerat" onchange="renderTabelBerat()">
+            <option value="ALL">Semua Tim</option>
+            <option value="Lapis 1">Tim Lapis 1</option>
+            <option value="Lapis 2">Tim Lapis 2</option>
+          </select>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Atlet</th>
+                <th>Tim</th>
+                <th>Kategori & Kelas</th>
+                <th>Batas Kelas</th>
+                <th>BB Aktual</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyBerat"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: STANDAR KELAS PERTANDINGAN 2025 -->
+    <div id="tab-aturan" class="section">
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 10px;">📋 Standar Kelas Berat Badan (Peraturan Pencak Silat 2025)</div>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 14px;">
+          Acuan resmi batas berat badan kategori Pra Remaja dan Remaja untuk evaluasi penimbangan atlet.
+        </p>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Kelas</th>
+                <th>Pra Remaja (Putra & Putri)</th>
+                <th>Remaja Putra</th>
+                <th>Remaja Putri</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Kelas A</strong></td><td>30 kg s/d 33 kg</td><td>39 kg s/d 43 kg</td><td>39 kg s/d 43 kg</td></tr>
+              <tr><td><strong>Kelas B</strong></td><td>&gt; 33 kg s/d 36 kg</td><td>&gt; 43 kg s/d 47 kg</td><td>&gt; 43 kg s/d 47 kg</td></tr>
+              <tr><td><strong>Kelas C</strong></td><td>&gt; 36 kg s/d 39 kg</td><td>&gt; 47 kg s/d 51 kg</td><td>&gt; 47 kg s/d 51 kg</td></tr>
+              <tr><td><strong>Kelas D</strong></td><td>&gt; 39 kg s/d 42 kg</td><td>&gt; 51 kg s/d 55 kg</td><td>&gt; 51 kg s/d 55 kg</td></tr>
+              <tr><td><strong>Kelas E</strong></td><td>&gt; 42 kg s/d 45 kg</td><td>&gt; 55 kg s/d 59 kg</td><td>&gt; 55 kg s/d 59 kg</td></tr>
+              <tr><td><strong>Kelas F</strong></td><td>&gt; 45 kg s/d 48 kg</td><td>&gt; 59 kg s/d 63 kg</td><td>&gt; 59 kg s/d 63 kg</td></tr>
+              <tr><td><strong>Kelas G</strong></td><td>&gt; 48 kg s/d 51 kg</td><td>&gt; 63 kg s/d 67 kg</td><td>&gt; 63 kg s/d 67 kg</td></tr>
+              <tr><td><strong>Kelas H</strong></td><td>&gt; 51 kg s/d 54 kg</td><td>&gt; 67 kg s/d 71 kg</td><td>&gt; 67 kg s/d 71 kg</td></tr>
+              <tr><td><strong>Kelas I</strong></td><td>&gt; 54 kg s/d 57 kg</td><td>&gt; 71 kg s/d 75 kg</td><td>&gt; 71 kg s/d 75 kg</td></tr>
+              <tr><td><strong>Kelas J</strong></td><td>&gt; 57 kg s/d 60 kg</td><td>&gt; 75 kg s/d 79 kg</td><td>&gt; 75 kg s/d 79 kg</td></tr>
+              <tr><td><strong>Kelas K</strong></td><td>&gt; 60 kg s/d 63 kg</td><td>&gt; 79 kg s/d 83 kg</td><td>-</td></tr>
+              <tr><td><strong>Kelas L</strong></td><td>&gt; 63 kg s/d 66 kg</td><td>&gt; 83 kg s/d 87 kg</td><td>-</td></tr>
+              <tr><td><strong>Kelas M</strong></td><td>&gt; 66 kg s/d 69 kg</td><td>-</td><td>-</td></tr>
+              <tr><td><strong>Kelas N</strong></td><td>&gt; 69 kg s/d 72 kg</td><td>-</td><td>-</td></tr>
+              <tr><td><strong>Kelas Bebas</strong></td><td>&gt; 72 kg s/d 75 kg</td><td>&gt; 87 kg s/d 99 kg</td><td>&gt; 79 kg s/d 91 kg</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL GRAFIK & BUKTI SCREENSHOT PER ATLET -->
+  <div class="modal" id="modalGrafik">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h3 id="modalNama" style="color: var(--secondary);">Nama Atlet</h3>
+          <small id="modalInfo" style="color: var(--muted);">Info Kelas & Tim</small>
+        </div>
+        <button class="close-btn" onclick="tutupModal()">✕ Tutup</button>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--primary);">📈 Grafik Joging Mingguan (Target 3 KM / Minggu)</h4>
+        <canvas id="chartMingguan" height="150"></canvas>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #d97706;">🌙 Grafik Program Ramadhan 07 Feb - 07 Mar 2027 (Target 40 KM)</h4>
+        <canvas id="chartRamadhan" height="150"></canvas>
+      </div>
+
+      <div>
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px;">📸 Bukti Screenshot & Link Strava</h4>
+        <div id="modalRiwayat" style="font-size: 0.85rem; color: var(--text);"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Standar Batas Berat Badan sesuai Peraturan Pencak Silat 2025
+    const BATAS_KELAS = {
+      "Pra Remaja": {
+        "A": [30, 33], "B": [33.01, 36], "C": [36.01, 39], "D": [39.01, 42],
+        "E": [42.01, 45], "F": [45.01, 48], "G": [48.01, 51], "H": [51.01, 54],
+        "I": [54.01, 57], "J": [57.01, 60], "K": [60.01, 63], "L": [63.01, 66],
+        "M": [66.01, 69], "N": [69.01, 72], "Bebas": [72.01, 75]
+      },
+      "Remaja": {
+        "A": [39, 43], "B": [43.01, 47], "C": [47.01, 51], "D": [51.01, 55],
+        "E": [55.01, 59], "F": [59.01, 63], "G": [63.01, 67], "H": [67.01, 71],
+        "I": [71.01, 75], "J": [75.01, 79], "K": [79.01, 83], "L": [83.01, 87],
+        "Bebas Putra": [87.01, 99], "Bebas Putri": [79.01, 91]
+      }
+    };
+
+    // Data 29 Atlet (Tim Lapis 1 & Tim Lapis 2)
+    const INITIAL_ATHLETES = [
+      // Tim Lapis 1 (13 Atlet)
+      { id: 1, nama: "Yehezkiel Gunawan S.", tim: "Lapis 1", kelas: "F", kategori: "Remaja", gender: "Putra" },
+      { id: 2, nama: "Rizky Heryanto", tim: "Lapis 1", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 3, nama: "Khairul Azzam", tim: "Lapis 1", kelas: "G", kategori: "Remaja", gender: "Putra" },
+      { id: 4, nama: "Rafi Ardiyansah", tim: "Lapis 1", kelas: "B", kategori: "Remaja", gender: "Putra" },
+      { id: 5, nama: "Alfiter Malau", tim: "Lapis 1", kelas: "I", kategori: "Remaja", gender: "Putra" },
+      { id: 6, nama: "Bagas Suryabakri", tim: "Lapis 1", kelas: "E", kategori: "Remaja", gender: "Putra" },
+      { id: 7, nama: "Gabriel Anugrah S.", tim: "Lapis 1", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 8, nama: "Endah Nur Saleh", tim: "Lapis 1", kelas: "E", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 9, nama: "M. Wildan Ardiansya", tim: "Lapis 1", kelas: "H", kategori: "Remaja", gender: "Putra" },
+      { id: 10, nama: "Putri Rahma Azzahra", tim: "Lapis 1", kelas: "C", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 11, nama: "Dwi Ajeng Rahmawati", tim: "Lapis 1", kelas: "B", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 12, nama: "Desta Handaru", tim: "Lapis 1", kelas: "K", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 13, nama: "Rendy Hansa Hidayat", tim: "Lapis 1", kelas: "F", kategori: "Pra Remaja", gender: "Putra" },
+
+      // Tim Lapis 2 (16 Atlet)
+      { id: 14, nama: "Raihan Iqbal Apriliando", tim: "Lapis 2", kelas: "A", kategori: "Remaja", gender: "Putra" },
+      { id: 15, nama: "Sahrul Ramdani Yazid", tim: "Lapis 2", kelas: "L", kategori: "Remaja", gender: "Putra" },
+      { id: 16, nama: "Hafidh Ilham Akbar", tim: "Lapis 2", kelas: "C", kategori: "Remaja", gender: "Putra" },
+      { id: 17, nama: "Siti Rohmah", tim: "Lapis 2", kelas: "C", kategori: "Remaja", gender: "Putri" },
+      { id: 18, nama: "Anindya Salsabila", tim: "Lapis 2", kelas: "Tunggal", kategori: "Remaja", gender: "Putri" },
+      { id: 19, nama: "Aditya Desyra Kartika", tim: "Lapis 2", kelas: "I", kategori: "Remaja", gender: "Putri" },
+      { id: 20, nama: "Zaskia Wulandari", tim: "Lapis 2", kelas: "D", kategori: "Remaja", gender: "Putri" },
+      { id: 21, nama: "M. Maulana Ardiansyah", tim: "Lapis 2", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 22, nama: "Anisa Nur Oktavia", tim: "Lapis 2", kelas: "M", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 23, nama: "Emir Cesar Arda Bili", tim: "Lapis 2", kelas: "F", kategori: "Remaja", gender: "Putra" },
+      { id: 24, nama: "Friska Simanjuntak", tim: "Lapis 2", kelas: "H", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 25, nama: "Olivia Stephanie S.", tim: "Lapis 2", kelas: "H", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 26, nama: "Arina Ramadhani", tim: "Lapis 2", kelas: "Tunggal", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 27, nama: "M. Aldan Prayoga", tim: "Lapis 2", kelas: "C", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 28, nama: "Iqbal Alfa Rizqy", tim: "Lapis 2", kelas: "G", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 29, nama: "Nifa Arthalia", tim: "Lapis 2", kelas: "F", kategori: "Pra Remaja", gender: "Putri" }
+    ];
+
+    let appData = JSON.parse(localStorage.getItem('silatAtletData_v2'));
+    if (!appData) {
+      appData = {};
+      INITIAL_ATHLETES.forEach(a => {
+        appData[a.id] = {
+          mingguan: [0, 0, 0, 0],
+          ramadhan: [0, 0, 0, 0],
+          berat: null,
+          riwayat: []
+        };
+      });
+      localStorage.setItem('silatAtletData_v2', JSON.stringify(appData));
+    }
+
+    let screenshotBase64 = "";
+    let chartMingguanInstance = null;
+    let chartRamadhanInstance = null;
+
+    // Navigasi Tab
+    function switchTab(tabName, btnEl) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      btnEl.classList.add('active');
+    }
+
+    // Kompres & Pratinjau Gambar Screenshot Strava
+    function prosesGambar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 500; // Kompresi agar ringan di browser
+          const scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          screenshotBase64 = canvas.toDataURL('image/jpeg', 0.65);
+
+          const previewEl = document.getElementById('previewScreenshot');
+          previewEl.src = screenshotBase64;
+          previewEl.style.display = 'block';
+          document.getElementById('labelUpload').innerText = "✅ Screenshot siap diunggah (Ketuk untuk ganti)";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function populateSelects() {
+      const selLari = document.getElementById('selectAtletLari');
+      const selBerat = document.getElementById('selectAtletBerat');
+      selLari.innerHTML = '';
+      selBerat.innerHTML = '';
+
+      INITIAL_ATHLETES.forEach(a => {
+        const label = `${a.nama} (${a.tim} - Kelas ${a.kelas} ${a.kategori})`;
+        selLari.add(new Option(label, a.id));
+        selBerat.add(new Option(label, a.id));
+      });
+    }
+
+    function getRangeText(atlet) {
+      if (atlet.kelas === "Tunggal") return "Kategori Seni (Bebas)";
+      const range = BATAS_KELAS[atlet.kategori]?.[atlet.kelas];
+      if (!range) return "-";
+      const minDisplay = range[0] % 1 !== 0 ? `>${Math.floor(range[0])}` : range[0];
+      return `${minDisplay} – ${range[1]} kg`;
+    }
+
+    function renderAtletCards() {
+      const grid = document.getElementById('athleteGrid');
+      const search = document.getElementById('searchAtlet').value.toLowerCase();
+      const timFilter = document.getElementById('filterTim').value;
+      grid.innerHTML = '';
+
+      INITIAL_ATHLETES.forEach(a => {
+        if (timFilter !== 'ALL' && a.tim !== timFilter) return;
+        if (!a.nama.toLowerCase().includes(search)) return;
+
+        const d = appData[a.id];
+        const totalMingguan = d.mingguan.reduce((acc, v) => acc + v, 0);
+        const totalRamadhan = d.ramadhan.reduce((acc, v) => acc + v, 0);
+        const persenMingguan = Math.min(100, (totalMingguan / 12) * 100);
+        const persenRamadhan = Math.min(100, (totalRamadhan / 40) * 100);
+
+        const card = document.createElement('div');
+        card.className = 'athlete-card';
+        card.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+              <span class="badge ${a.tim === 'Lapis 1' ? 'badge-lapis1' : 'badge-lapis2'}">${a.tim}</span>
+              <span style="font-size: 0.78rem; font-weight: 600; color: var(--muted);">
+                Kelas ${a.kelas} ${a.kategori} ${a.gender}
+              </span>
+            </div>
+            <h3 style="font-size: 1rem; margin-bottom: 4px;">${a.nama}</h3>
+            <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 10px;">
+              BB Aktual: <strong>${d.berat ? d.berat + ' kg' : 'Belum diisi'}</strong> (Target: ${getRangeText(a)})
+            </div>
+
+            <div class="progress-wrap">
+              <div class="progress-label">
+                <span>Joging Mingguan (3km/mgg)</span>
+                <span>${totalMingguan.toFixed(1)} / 12 KM</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${persenMingguan}%"></div>
+              </div>
+            </div>
+
+            <div class="progress-wrap">
+              <div class="progress-label">
+                <span>Ramadhan (07 Feb - 07 Mar)</span>
+                <span>${totalRamadhan.toFixed(1)} / 40 KM</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ramadhan" style="width: ${persenRamadhan}%"></div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-outline" onclick="bukaModalGrafik(${a.id})">📊 Grafik & Bukti Strava (${d.riwayat.length})</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Simpan Setoran Lari + Screenshot Strava
+    function simpanLari() {
+      const id = parseInt(document.getElementById('selectAtletLari').value);
+      const program = document.getElementById('jenisProgram').value;
+      const minggu = parseInt(document.getElementById('mingguKe').value) - 1;
+      const km = parseFloat(document.getElementById('inputKm').value);
+      const link = document.getElementById('inputStrava').value.trim();
+
+      if (isNaN(km) || km <= 0) {
+        alert("Masukkan jarak lari (KM) yang valid!");
+        return;
+      }
+
+      if (!screenshotBase64 && !link) {
+        alert("Harap unggah Screenshot Strava atau masukkan Link Postingan Strava sebagai bukti!");
+        return;
+      }
+
+      appData[id][program][minggu] += km;
+      appData[id].riwayat.unshift({
+        tanggal: new Date().toLocaleDateString('id-ID'),
+        program: program === 'mingguan' ? 'Program Mingguan' : 'Program Ramadhan',
+        minggu: minggu + 1,
+        km: km,
+        link: link || '#',
+        gambar: screenshotBase64
+      });
+
+      try {
+        localStorage.setItem('silatAtletData_v2', JSON.stringify(appData));
+      } catch (e) {
+        alert("Memori browser penuh. Hapus riwayat lama atau gunakan gambar berukuran lebih kecil.");
+        return;
+      }
+
+      // Reset form
+      document.getElementById('inputKm').value = '';
+      document.getElementById('inputStrava').value = '';
+      document.getElementById('inputFileScreenshot').value = '';
+      document.getElementById('previewScreenshot').style.display = 'none';
+      document.getElementById('labelUpload').innerText = "📸 Ketuk di sini untuk memilih foto screenshot Strava";
+      screenshotBase64 = "";
+
+      renderAtletCards();
+      alert("Setoran lari dan bukti screenshot Strava berhasil disimpan!");
+    }
+
+    function simpanBerat() {
+      const id = parseInt(document.getElementById('selectAtletBerat').value);
+      const berat = parseFloat(document.getElementById('inputBerat').value);
+
+      if (isNaN(berat) || berat < 20 || berat > 150) {
+        alert("Masukkan berat badan yang valid!");
+        return;
+      }
+
+      appData[id].berat = berat;
+      localStorage.setItem('silatAtletData_v2', JSON.stringify(appData));
+      document.getElementById('inputBerat').value = '';
+
+      renderAtletCards();
+      renderTabelBerat();
+      alert("Berat badan atlet berhasil diperbarui!");
+    }
+
+    function renderTabelBerat() {
+      const tbody = document.getElementById('tbodyBerat');
+      const filter = document.getElementById('filterTimBerat').value;
+      tbody.innerHTML = '';
+
+      let no = 1;
+      INITIAL_ATHLETES.forEach(a => {
+        if (filter !== 'ALL' && a.tim !== filter) return;
+        const berat = appData[a.id].berat;
+        const rangeText = getRangeText(a);
+
+        let statusHtml = `<span class="badge" style="background:#f1f5f9; color:#64748b;">Belum Timbang</span>`;
+        if (berat !== null) {
+          if (a.kelas === "Tunggal") {
+            statusHtml = `<span class="badge badge-ok">Sesuai (Seni)</span>`;
+          } else {
+            const [min, max] = BATAS_KELAS[a.kategori][a.kelas];
+            if (berat >= min && berat <= max) {
+              statusHtml = `<span class="badge badge-ok">Ideal / Masuk Kelas</span>`;
+            } else if (berat < min) {
+              statusHtml = `<span class="badge badge-warn">Kurang ${(min - berat).toFixed(1)} kg</span>`;
+            } else {
+              statusHtml = `<span class="badge badge-lapis1">Over ${(berat - max).toFixed(1)} kg</span>`;
+            }
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${no++}</td>
+          <td><strong>${a.nama}</strong></td>
+          <td><span class="badge ${a.tim === 'Lapis 1' ? 'badge-lapis1' : 'badge-lapis2'}">${a.tim}</span></td>
+          <td>Kelas ${a.kelas} (${a.kategori} ${a.gender})</td>
+          <td>${rangeText}</td>
+          <td><strong>${berat !== null ? berat + ' kg' : '-'}</strong></td>
+          <td>${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Modal Grafik & Bukti Screenshot Strava
+    function bukaModalGrafik(id) {
+      const atlet = INITIAL_ATHLETES.find(a => a.id === id);
+      const d = appData[id];
+
+      document.getElementById('modalNama').innerText = atlet.nama;
+      document.getElementById('modalInfo').innerText = `${atlet.tim} • Kelas ${atlet.kelas} ${atlet.kategori} ${atlet.gender} • BB: ${d.berat ? d.berat + ' kg' : '-'}`;
+
+      const riwayatEl = document.getElementById('modalRiwayat');
+      if (d.riwayat.length === 0) {
+        riwayatEl.innerHTML = '<p style="color:#888;">Belum ada riwayat setoran lari.</p>';
+      } else {
+        riwayatEl.innerHTML = d.riwayat.map(r => `
+          <div class="riwayat-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>${r.program} (Minggu ke-${r.minggu})</strong> • <span style="color: var(--primary); font-weight: bold;">${r.km} KM</span><br>
+                <small style="color:#64748b;">Tanggal setor: ${r.tanggal}</small>
+              </div>
+              ${r.link && r.link !== '#' ? `<a href="${r.link}" target="_blank" style="background: #fff0e8; color: #fc4c02; border: 1px solid #fc4c02; padding: 5px 10px; border-radius: 6px; font-weight: bold; font-size: 0.78rem; text-decoration: none;">Link Strava ↗</a>` : ''}
+            </div>
+            ${r.gambar ? `<img src="${r.gambar}" class="riwayat-img" alt="Bukti Screenshot Strava" onclick="window.open('${r.gambar}', '_blank')">` : ''}
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('modalGrafik').classList.add('open');
+
+      if (chartMingguanInstance) chartMingguanInstance.destroy();
+      if (chartRamadhanInstance) chartRamadhanInstance.destroy();
+
+      const ctx1 = document.getElementById('chartMingguan').getContext('2d');
+      chartMingguanInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+          datasets: [
+            {
+              label: 'Capaian Lari (KM)',
+              data: d.mingguan,
+              backgroundColor: '#b91c1c',
+              borderRadius: 6
+            },
+            {
+              label: 'Target Minimal (3 KM)',
+              data: [3, 3, 3, 3],
+              type: 'line',
+              borderColor: '#15803d',
+              borderDash: [5, 5],
+              fill: false
+            }
+          ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      const kumulatif = [];
+      let sum = 0;
+      d.ramadhan.forEach(v => { sum += v; kumulatif.push(sum); });
+
+      const ctx2 = document.getElementById('chartRamadhan').getContext('2d');
+      chartRamadhanInstance = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['Mgg 1 (Feb)', 'Mgg 2 (Feb)', 'Mgg 3 (Feb/Mar)', 'Mgg 4 (07 Mar)'],
+          datasets: [
+            {
+              label: 'Total Akumulasi (KM)',
+              data: kumulatif,
+              borderColor: '#d97706',
+              backgroundColor: 'rgba(245, 158, 11, 0.2)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Target Jalur 40 KM',
+              data: [10, 20, 30, 40],
+              borderColor: '#64748b',
+              borderDash: [5, 5],
+              fill: false
+            }
+          ]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 45 } } }
+      });
+    }
+
+    function tutupModal() {
+      document.getElementById('modalGrafik').classList.remove('open');
+    }
+
+    function eksporData() {
+      const jsonStr = JSON.stringify(appData);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert("Kode data seluruh atlet berhasil disalin!");
+      });
+    }
+
+    function imporData() {
+      const input = prompt("Tempelkan (Paste) kode data tim yang dibagikan pelatih:");
+      if (!input) return;
+      try {
+        const parsed = JSON.parse(input);
+        if (parsed && parsed[1]) {
+          appData = parsed;
+          localStorage.setItem('silatAtletData_v2', JSON.stringify(appData));
+          renderAtletCards();
+          renderTabelBerat();
+          alert("Data tim berhasil diperbarui!");
+        } else {
+          alert("Format data tidak valid.");
+        }
+      } catch (e) {
+        alert("Gagal membaca kode data.");
+      }
+    }
+
+    populateSelects();
+    renderAtletCards();
+    renderTabelBerat();
+  </script>
+</body>
+</html>
