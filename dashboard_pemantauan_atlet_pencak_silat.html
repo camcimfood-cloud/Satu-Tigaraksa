@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Atlet Pencak Silat - Lapis 1 & 2</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js untuk Grafik Perkembangan -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Inter & Oswald -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome untuk Ikon Olahraga -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Oswald', 'sans-serif'],
+          },
+          colors: {
+            strava: '#FC4C02',
+            silatGold: '#F59E0B',
+            silatRed: '#DC2626',
+            darkBg: '#0F172A',
+            cardBg: '#1E293B',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar untuk kenyamanan mobile & desktop */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0F172A; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FC4C02; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-strava selection:text-white">
+
+  <!-- Toast / Notification Container (Pengganti alert()) -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
+
+  <!-- Header Utama -->
+  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-strava via-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-strava/20 shrink-0">
+          <i class="fa-solid fa-medal text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-display text-xl sm:text-2xl tracking-wide uppercase font-bold text-white leading-tight">
+            SILAT <span class="text-strava">PERFORMANCE</span> TRACKER
+          </h1>
+          <p class="text-xs text-slate-400 flex items-center gap-2">
+            <span>Tim Lapis 1 & 2 (29 Atlet)</span>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="sync-status" class="text-emerald-400 font-medium">Publik & Real-time</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Info Target Program Singkat -->
+      <div class="flex items-center gap-2 text-xs bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700/60">
+        <div class="text-right">
+          <div class="text-slate-400">Program Ramadhan 2027</div>
+          <div class="font-bold text-amber-400">07 Feb - 07 Mar (Target 40 KM)</div>
+        </div>
+        <div class="h-7 w-[1px] bg-slate-700 mx-1"></div>
+        <div>
+          <div class="text-slate-400">Reguler</div>
+          <div class="font-bold text-strava">3 KM / Minggu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigasi Tab Mobile-Friendly -->
+    <nav class="max-w-7xl mx-auto px-4 overflow-x-auto no-scrollbar">
+      <div class="flex space-x-2 pb-3 pt-1 min-w-max">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn active px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all bg-strava text-white shadow-md shadow-strava/25">
+          <i class="fa-solid fa-chart-line"></i> Dashboard & Grafik
+        </button>
+        <button onclick="switchTab('setoran')" id="tab-setoran" class="nav-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i class="fa-brands fa-strava"></i> Setoran Strava
+        </button>
+        <button onclick="switchTab('atlet')" id="tab-atlet" class="nav-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i class="fa-solid fa-weight-scale"></i> Atlet & Berat Badan
+        </button>
+        <button onclick="switchTab('referensi')" id="tab-referensi" class="nav-btn px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <i class="fa-solid fa-book-open"></i> Kelas Resmi 2025
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Konten Utama -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- ==========================================
+         TAB 1: DASHBOARD & GRAFIK PERKEMBANGAN
+         ========================================== -->
+    <section id="view-dashboard" class="space-y-6">
+      
+      <!-- Ringkasan Statistik Cepat -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+            <span>TOTAL ATLET</span>
+            <i class="fa-solid fa-users text-amber-400"></i>
+          </div>
+          <div class="text-2xl sm:text-3xl font-display font-bold text-white">29 <span class="text-xs font-sans font-normal text-slate-400">Atlet</span></div>
+          <div class="text-[11px] text-slate-400 mt-1">13 Lapis 1 • 16 Lapis 2</div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+            <span>TOTAL KM RAMADHAN</span>
+            <i class="fa-solid fa-fire text-strava"></i>
+          </div>
+          <div id="stat-total-ramadhan" class="text-2xl sm:text-3xl font-display font-bold text-strava">0.0 <span class="text-xs font-sans font-normal text-slate-400">KM</span></div>
+          <div class="text-[11px] text-slate-400 mt-1">Target 40 KM / Atlet</div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+            <span>TOTAL KM MINGGUAN</span>
+            <i class="fa-solid fa-person-running text-emerald-400"></i>
+          </div>
+          <div id="stat-total-mingguan" class="text-2xl sm:text-3xl font-display font-bold text-emerald-400">0.0 <span class="text-xs font-sans font-normal text-slate-400">KM</span></div>
+          <div class="text-[11px] text-slate-400 mt-1">Target 3 KM / Minggu</div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-medium mb-1">
+            <span>BERAT BADAN IDEAL</span>
+            <i class="fa-solid fa-check-circle text-sky-400"></i>
+          </div>
+          <div id="stat-bb-ideal" class="text-2xl sm:text-3xl font-display font-bold text-sky-400">0 <span class="text-xs font-sans font-normal text-slate-400">/ 27 Tanding</span></div>
+          <div class="text-[11px] text-slate-400 mt-1">+2 Atlet Kategori Seni</div>
+        </div>
+      </div>
+
+      <!-- Grafik Utama Perbandingan Seluruh Atlet -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-strava"></i>
+              Grafik Capaian Lari Seluruh Atlet (Publik)
+            </h2>
+            <p class="text-xs text-slate-400">Klik nama atlet di bawah untuk membuka grafik perkembangan individu secara detail</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <select id="chart-team-filter" onchange="renderOverviewChart()" class="bg-slate-800 border border-slate-700 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-strava">
+              <option value="all">Semua Tim (29 Atlet)</option>
+              <option value="Lapis 1">Tim Lapis 1 (13 Atlet)</option>
+              <option value="Lapis 2">Tim Lapis 2 (16 Atlet)</option>
+            </select>
+            <select id="chart-program-filter" onchange="renderOverviewChart()" class="bg-slate-800 border border-slate-700 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-strava">
+              <option value="ramadhan">Program Ramadhan (Target 40 KM)</option>
+              <option value="mingguan">Joging Mingguan (Target 3 KM/Mg)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Container Canvas Responsif -->
+        <div class="w-full overflow-x-auto pb-2">
+          <div class="min-w-[750px] h-[340px] relative">
+            <canvas id="overviewChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kartu Progres Individual Setiap Atlet (Klik untuk Grafik Individu) -->
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-lg font-bold text-white">Pantauan Progres Per Atlet</h3>
+            <p class="text-xs text-slate-400">Ketuk kartu atlet untuk melihat grafik detail mingguan & Ramadhan</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1 sm:w-56">
+              <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="search-dashboard-atlet" oninput="renderDashboardCards()" placeholder="Cari nama atlet..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-strava">
+            </div>
+            <select id="filter-dashboard-tim" onchange="renderDashboardCards()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-strava">
+              <option value="all">Semua Tim</option>
+              <option value="Lapis 1">Lapis 1</option>
+              <option value="Lapis 2">Lapis 2</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="dashboard-athlete-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Diisi via JavaScript -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==========================================
+         TAB 2: FORM SETORAN STRAVA & FEED PUBLIK
+         ========================================== -->
+    <section id="view-setoran" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Form Input Setoran (5 Kolom di Desktop) -->
+        <div class="lg:col-span-5">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl sticky top-28">
+            <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-800">
+              <div class="w-9 h-9 rounded-xl bg-strava/20 text-strava flex items-center justify-center">
+                <i class="fa-brands fa-strava text-lg"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-white text-base">Setoran Lari Strava</h2>
+                <p class="text-xs text-slate-400">Otomatis update grafik & terlihat semua orang</p>
+              </div>
+            </div>
+
+            <form id="form-setoran" onsubmit="handleSetoranSubmit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nama Atlet <span class="text-red-400">*</span></label>
+                <select id="input-atlet" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+                  <option value="">-- Pilih Nama Atlet --</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Jenis Program Latihan <span class="text-red-400">*</span></label>
+                <select id="input-program" onchange="toggleMingguField()" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+                  <option value="ramadhan">Program Ramadhan (07 Feb - 07 Mar 2027 • Target 40 KM)</option>
+                  <option value="mingguan">Joging Reguler Mingguan (Target 3 KM / Minggu)</option>
+                </select>
+              </div>
+
+              <div id="field-minggu-ke" class="hidden">
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Periode Minggu Ke-</label>
+                <select id="input-minggu" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+                  <option value="1">Minggu ke-1</option>
+                  <option value="2">Minggu ke-2</option>
+                  <option value="3">Minggu ke-3</option>
+                  <option value="4">Minggu ke-4</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Jarak Lari (KM) <span class="text-red-400">*</span></label>
+                  <input type="number" id="input-jarak" step="0.01" min="0.1" max="100" required placeholder="Contoh: 3.5" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Tanggal Lari <span class="text-red-400">*</span></label>
+                  <input type="date" id="input-tanggal" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Link Postingan Strava <span class="text-red-400">*</span></label>
+                <input type="url" id="input-link" required placeholder="https://strava.app.link/... atau https://www.strava.com/activities/..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-strava">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Upload Screenshot Strava <span class="text-red-400">*</span></label>
+                <div class="relative border-2 border-dashed border-slate-700 hover:border-strava rounded-xl p-4 text-center transition-colors bg-slate-800/50">
+                  <input type="file" id="input-screenshot" accept="image/*" required onchange="handleImageUpload(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                  <div id="upload-placeholder" class="space-y-1">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-strava"></i>
+                    <p class="text-xs font-medium text-slate-300">Ketuk untuk pilih foto screenshot Strava</p>
+                    <p class="text-[11px] text-slate-500">Otomatis dikompres agar cepat tampil</p>
+                  </div>
+                  <img id="screenshot-preview" src="" alt="Preview Screenshot" class="hidden max-h-44 mx-auto rounded-lg shadow-md object-contain">
+                </div>
+              </div>
+
+              <button type="submit" id="btn-submit-setoran" class="w-full bg-gradient-to-r from-strava to-orange-600 hover:from-orange-500 hover:to-strava text-white font-bold py-3 rounded-xl shadow-lg shadow-strava/25 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Kirim Setoran Sekarang
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Feed Riwayat Setoran Publik (7 Kolom di Desktop) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+            <div>
+              <h2 class="font-bold text-white text-base">Riwayat Setoran Lari (Terlihat Semua Orang)</h2>
+              <p class="text-xs text-slate-400">Verifikasi bukti screenshot & tautan aktivitas Strava</p>
+            </div>
+            <select id="filter-feed-program" onchange="renderFeedSetoran()" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-strava">
+              <option value="all">Semua Program</option>
+              <option value="ramadhan">Program Ramadhan 40KM</option>
+              <option value="mingguan">Joging Mingguan 3KM</option>
+            </select>
+          </div>
+
+          <div id="feed-setoran-list" class="space-y-4">
+            <!-- Feed Card diisi JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 3: DAFTAR ATLET & BERAT BADAN IDEAL
+         ========================================== -->
+    <section id="view-atlet" class="hidden space-y-5">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-weight-scale text-amber-400"></i>
+            Pemantauan Berat Badan Atlet Sesuai Kelas Tanding
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Perbarui berat badan aktual atlet untuk memantau status kesesuaian kelas (Peraturan 2025)</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+            <button onclick="setTeamFilterBB('all')" id="bb-tab-all" class="bb-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-strava text-white">Semua (29)</button>
+            <button onclick="setTeamFilterBB('Lapis 1')" id="bb-tab-lapis1" class="bb-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white">Lapis 1 (13)</button>
+            <button onclick="setTeamFilterBB('Lapis 2')" id="bb-tab-lapis2" class="bb-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white">Lapis 2 (16)</button>
+          </div>
+          <input type="text" id="search-bb-atlet" oninput="renderBeratBadanList()" placeholder="Cari atlet / kelas..." class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-strava">
+        </div>
+      </div>
+
+      <!-- Tabel / Kartu Responsif Berat Badan -->
+      <div id="bb-athlete-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Diisi via JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 4: REFERENSI KELAS BERAT BADAN RESMI 2025
+         ========================================== -->
+    <section id="view-referensi" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-amber-950/30 border border-slate-800 rounded-2xl p-5">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-scale-balanced text-amber-400"></i>
+          Standar Kelas Berat Badan Resmi — Peraturan Pertandingan Pencak Silat 2025
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Acuan resmi kategori Pra Remaja dan Remaja (Putra & Putri) untuk tim pelatih dan atlet.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Tabel Kategori Remaja -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+          <div class="bg-slate-800/90 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+            <h3 class="font-bold text-amber-400 text-sm uppercase tracking-wider">Kategori Tanding Remaja (Putra & Putri)</h3>
+            <span class="text-[11px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-semibold">39 kg – 99 kg</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="py-2.5 px-4">Kelas</th>
+                  <th class="py-2.5 px-4">Rentang Berat Badan</th>
+                  <th class="py-2.5 px-4">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="table-ref-remaja" class="divide-y divide-slate-800/70">
+                <!-- Diisi JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tabel Kategori Pra Remaja -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+          <div class="bg-slate-800/90 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+            <h3 class="font-bold text-strava text-sm uppercase tracking-wider">Kategori Tanding Pra Remaja (Putra & Putri)</h3>
+            <span class="text-[11px] bg-strava/20 text-orange-300 px-2.5 py-0.5 rounded-full font-semibold">30 kg – 75 kg</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="py-2.5 px-4">Kelas</th>
+                  <th class="py-2.5 px-4">Rentang Berat Badan</th>
+                  <th class="py-2.5 px-4">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="table-ref-praremaja" class="divide-y divide-slate-800/70">
+                <!-- Diisi JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODAL GRAFIK INDIVIDU ATLET
+       ========================================== -->
+  <div id="modal-athlete-detail" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl my-auto">
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modal-tim-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-strava/20 text-strava">Tim Lapis 1</span>
+            <span id="modal-kelas-badge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">Kelas F Remaja Putra</span>
+          </div>
+          <h3 id="modal-athlete-name" class="text-xl font-bold text-white mt-1.5">Nama Atlet</h3>
+          <p id="modal-weight-info" class="text-xs text-slate-400 mt-0.5">Target Berat Badan: > 59 kg s/d 63 kg</p>
+        </div>
+        <button onclick="closeAthleteModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Ringkasan Progres 2 Program -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4">
+        <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3.5">
+          <div class="text-xs text-slate-400">Program Ramadhan (07 Feb - 07 Mar 2027)</div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="modal-ramadhan-km" class="text-xl font-display font-bold text-strava">0.0 KM</span>
+            <span class="text-xs text-slate-400">Target: 40 KM</span>
+          </div>
+          <div class="w-full bg-slate-950 h-2 rounded-full mt-2 overflow-hidden">
+            <div id="modal-ramadhan-bar" class="bg-strava h-full rounded-full transition-all" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3.5">
+          <div class="text-xs text-slate-400">Joging Reguler (Target 3 KM / Minggu)</div>
+          <div class="flex items-baseline justify-between mt-1">
+            <span id="modal-mingguan-km" class="text-xl font-display font-bold text-emerald-400">0.0 KM</span>
+            <span class="text-xs text-slate-400">Akumulasi 4 Minggu</span>
+          </div>
+          <div class="w-full bg-slate-950 h-2 rounded-full mt-2 overflow-hidden">
+            <div id="modal-mingguan-bar" class="bg-emerald-400 h-full rounded-full transition-all" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grafik Perkembangan Individu -->
+      <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Grafik Perkembangan Lari Mingguan & Ramadhan</h4>
+        <div class="h-56 w-full relative">
+          <canvas id="individualChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Riwayat Setoran Khusus Atlet Ini -->
+      <div class="mt-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Catatan Setoran Strava Atlet Ini</h4>
+        <div id="modal-athlete-logs" class="max-h-44 overflow-y-auto space-y-2 pr-1">
+          <!-- Diisi via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL PREVIEW GAMBAR FULLSCREEN
+       ========================================== -->
+  <div id="modal-image-preview" onclick="this.classList.add('hidden')" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out">
+    <div class="max-w-lg w-full text-center space-y-3">
+      <img id="fullscreen-img" src="" alt="Bukti Strava" class="max-h-[80vh] mx-auto rounded-xl border border-slate-700 shadow-2xl">
+      <p class="text-xs text-slate-400">Ketuk di mana saja untuk menutup pratinjau</p>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       FIREBASE & APPLICATION LOGIC
+       ========================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ---------------------------------------------------------
+    // 1. MASTER DATA 29 ATLET & PERATURAN BERAT BADAN 2025
+    // ---------------------------------------------------------
+    const ATHLETES_MASTER = [
+      // TIM LAPIS 1 (13 Atlet)
+      { id: "l1_01", tim: "Lapis 1", nama: "Yehezkiel Gunawan S.", kelasLabel: "Kelas F Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 59.01, maxKg: 63.0, rangeText: "> 59 kg s/d 63 kg" },
+      { id: "l1_02", tim: "Lapis 1", nama: "Rizky Heryanto", kelasLabel: "Kelas D Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 55.0, rangeText: "> 51 kg s/d 55 kg" },
+      { id: "l1_03", tim: "Lapis 1", nama: "Khairul Azzam", kelasLabel: "Kelas G Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 63.01, maxKg: 67.0, rangeText: "> 63 kg s/d 67 kg" },
+      { id: "l1_04", tim: "Lapis 1", nama: "Rafi Ardiyansah", kelasLabel: "Kelas B Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 43.01, maxKg: 47.0, rangeText: "> 43 kg s/d 47 kg" },
+      { id: "l1_05", tim: "Lapis 1", nama: "Alfiter Malau", kelasLabel: "Kelas I Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 71.01, maxKg: 75.0, rangeText: "> 71 kg s/d 75 kg" },
+      { id: "l1_06", tim: "Lapis 1", nama: "Bagas Suryabakri", kelasLabel: "Kelas E Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 55.01, maxKg: 59.0, rangeText: "> 55 kg s/d 59 kg" },
+      { id: "l1_07", tim: "Lapis 1", nama: "Gabriel Anugrah S.", kelasLabel: "Kelas D Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 55.0, rangeText: "> 51 kg s/d 55 kg" },
+      { id: "l1_08", tim: "Lapis 1", nama: "Endah Nur Saleh", kelasLabel: "Kelas E Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 42.01, maxKg: 45.0, rangeText: "> 42 kg s/d 45 kg" },
+      { id: "l1_09", tim: "Lapis 1", nama: "M. Wildan Ardiansya", kelasLabel: "Kelas H Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 67.01, maxKg: 71.0, rangeText: "> 67 kg s/d 71 kg" },
+      { id: "l1_10", tim: "Lapis 1", nama: "Putri Rahma Azzahra", kelasLabel: "Kelas C Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Tanding", minKg: 36.01, maxKg: 39.0, rangeText: "> 36 kg s/d 39 kg" },
+      { id: "l1_11", tim: "Lapis 1", nama: "Dwi Ajeng Rahmawati", kelasLabel: "Kelas B Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 33.01, maxKg: 36.0, rangeText: "> 33 kg s/d 36 kg" },
+      { id: "l1_12", tim: "Lapis 1", nama: "Desta Handaru", kelasLabel: "Kelas K Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 60.01, maxKg: 63.0, rangeText: "> 60 kg s/d 63 kg" },
+      { id: "l1_13", tim: "Lapis 1", nama: "Rendy Hansa Hidayat", kelasLabel: "Kelas F Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 45.01, maxKg: 48.0, rangeText: "> 45 kg s/d 48 kg" },
+
+      // TIM LAPIS 2 (16 Atlet)
+      { id: "l2_01", tim: "Lapis 2", nama: "Raihan Iqbal Apriliando", kelasLabel: "Kelas A Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 39.0, maxKg: 43.0, rangeText: "39 kg s/d 43 kg" },
+      { id: "l2_02", tim: "Lapis 2", nama: "Sahrul Ramdani Yazid", kelasLabel: "Kelas L Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 83.01, maxKg: 87.0, rangeText: "> 83 kg s/d 87 kg" },
+      { id: "l2_03", tim: "Lapis 2", nama: "Hafidh Ilham Akbar", kelasLabel: "Kelas C Remaja", kategori: "Remaja", jenis: "Tanding", minKg: 47.01, maxKg: 51.0, rangeText: "> 47 kg s/d 51 kg" },
+      { id: "l2_04", tim: "Lapis 2", nama: "Siti Rohmah", kelasLabel: "Kelas C Remaja Putri", kategori: "Remaja", jenis: "Tanding", minKg: 47.01, maxKg: 51.0, rangeText: "> 47 kg s/d 51 kg" },
+      { id: "l2_05", tim: "Lapis 2", nama: "Anindya Salsabila", kelasLabel: "Tunggal Remaja Putri", kategori: "Remaja", jenis: "Seni", minKg: null, maxKg: null, rangeText: "Kategori Seni (Non-Kelas Berat)" },
+      { id: "l2_06", tim: "Lapis 2", nama: "Aditya Desyra Kartika", kelasLabel: "Kelas I Remaja Putri", kategori: "Remaja", jenis: "Tanding", minKg: 71.01, maxKg: 75.0, rangeText: "> 71 kg s/d 75 kg" },
+      { id: "l2_07", tim: "Lapis 2", nama: "Zaskia Wulandari", kelasLabel: "Kelas D Remaja Putri", kategori: "Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 55.0, rangeText: "> 51 kg s/d 55 kg" },
+      { id: "l2_08", tim: "Lapis 2", nama: "M. Maulana Ardiansyah", kelasLabel: "Kelas D Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 55.0, rangeText: "> 51 kg s/d 55 kg" },
+      { id: "l2_09", tim: "Lapis 2", nama: "Anisa Nur Oktavia", kelasLabel: "Kelas M Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Tanding", minKg: 66.01, maxKg: 69.0, rangeText: "> 66 kg s/d 69 kg" },
+      { id: "l2_10", tim: "Lapis 2", nama: "Emir Cesar Arda Bili", kelasLabel: "Kelas F Remaja Putra", kategori: "Remaja", jenis: "Tanding", minKg: 59.01, maxKg: 63.0, rangeText: "> 59 kg s/d 63 kg" },
+      { id: "l2_11", tim: "Lapis 2", nama: "Friska Simanjuntak", kelasLabel: "Kelas H Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 54.0, rangeText: "> 51 kg s/d 54 kg" },
+      { id: "l2_12", tim: "Lapis 2", nama: "Olivia Stephanie S.", kelasLabel: "Kelas H Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Tanding", minKg: 51.01, maxKg: 54.0, rangeText: "> 51 kg s/d 54 kg" },
+      { id: "l2_13", tim: "Lapis 2", nama: "Arina Ramadhani", kelasLabel: "Tunggal Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Seni", minKg: null, maxKg: null, rangeText: "Kategori Seni (Non-Kelas Berat)" },
+      { id: "l2_14", tim: "Lapis 2", nama: "M. Aldan Prayoga", kelasLabel: "Kelas C Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 36.01, maxKg: 39.0, rangeText: "> 36 kg s/d 39 kg" },
+      { id: "l2_15", tim: "Lapis 2", nama: "Iqbal Alfa Rizqy", kelasLabel: "Kelas G Pra Remaja Putra", kategori: "Pra Remaja", jenis: "Tanding", minKg: 48.01, maxKg: 51.0, rangeText: "> 48 kg s/d 51 kg" },
+      { id: "l2_16", tim: "Lapis 2", nama: "Nifa Arthalia", kelasLabel: "Kelas F Pra Remaja Putri", kategori: "Pra Remaja", jenis: "Tanding", minKg: 45.01, maxKg: 48.0, rangeText: "> 45 kg s/d 48 kg" }
+    ];
+
+    const REF_REMAJA = [
+      { kelas: "Kelas A", range: "39 kg s/d 43 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas B", range: "> 43 kg s/d 47 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas C", range: "> 47 kg s/d 51 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas D", range: "> 51 kg s/d 55 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas E", range: "> 55 kg s/d 59 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas F", range: "> 59 kg s/d 63 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas G", range: "> 63 kg s/d 67 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas H", range: "> 67 kg s/d 71 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas I", range: "> 71 kg s/d 75 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas J", range: "> 75 kg s/d 79 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas K", range: "> 79 kg s/d 83 kg", ket: "Khusus Putra" },
+      { kelas: "Kelas L", range: "> 83 kg s/d 87 kg", ket: "Khusus Putra" },
+      { kelas: "Kelas Bebas", range: "> 87 - 99 kg (Pa) / > 79 - 91 kg (Pi)", ket: "Putra & Putri" },
+      { kelas: "Seni Tunggal", range: "Non-Kelas Berat", ket: "Kategori Seni" }
+    ];
+
+    const REF_PRAREMAJA = [
+      { kelas: "Kelas A", range: "30 kg s/d 33 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas B", range: "> 33 kg s/d 36 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas C", range: "> 36 kg s/d 39 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas D", range: "> 39 kg s/d 42 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas E", range: "> 42 kg s/d 45 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas F", range: "> 45 kg s/d 48 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas G", range: "> 48 kg s/d 51 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas H", range: "> 51 kg s/d 54 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas I", range: "> 54 kg s/d 57 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas J", range: "> 57 kg s/d 60 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas K", range: "> 60 kg s/d 63 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas L", range: "> 63 kg s/d 66 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas M", range: "> 66 kg s/d 69 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas N", range: "> 69 kg s/d 72 kg", ket: "Putra & Putri" },
+      { kelas: "Kelas Bebas", range: "> 72 kg s/d 75 kg", ket: "Putra & Putri" },
+      { kelas: "Seni Tunggal", range: "Non-Kelas Berat", ket: "Kategori Seni" }
+    ];
+
+    // ---------------------------------------------------------
+    // 2. STATE APLIKASI & INISIALISASI FIREBASE FIRESTORE
+    // ---------------------------------------------------------
+    let runLogs = []; // Menyimpan seluruh setoran lari publik
+    let athleteWeights = {}; // Map athleteId -> { weight: number, updatedAt: string }
+    let currentBBTeamFilter = "all";
+    let compressedBase64Image = "";
+    let overviewChartInstance = null;
+    let individualChartInstance = null;
+
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'silat-tracker-2027';
+
+    // Fungsi Notifikasi Toast
+    window.showToast = function(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'error' ? 'bg-red-600 border-red-400' : (type === 'info' ? 'bg-slate-800 border-slate-600' : 'bg-emerald-600 border-emerald-400');
+      const icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-circle-info' : 'fa-circle-check');
+
+      toast.className = `${bgClass} border text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 pointer-events-auto transition-all duration-300 transform translate-y-0`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-sm shrink-0"></i><span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    };
+
+    // Setup Firebase dengan Aturan Wajib (Auth First + Strict Public Paths)
+    async function initFirebase() {
+      try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          const firebaseConfig = JSON.parse(__firebase_config);
+          const app = initializeApp(firebaseConfig);
+          auth = getAuth(app);
+          db = getFirestore(app);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              currentUser = user;
+              subscribePublicData();
+            }
+          });
+        } else {
+          // Fallback in-memory dengan sampel awal jika tanpa config cloud
+          document.getElementById('sync-status').innerText = "Mode Sesi Lokal";
+          loadInitialMockData();
+          refreshAllUI();
+        }
+      } catch (err) {
+        console.error("Firebase init error:", err);
+        document.getElementById('sync-status').innerText = "Mode Offline";
+        loadInitialMockData();
+        refreshAllUI();
+      }
+    }
+
+    function loadInitialMockData() {
+      // Data awal ringan agar grafik langsung terlihat informatif
+      athleteWeights = {
+        "l1_01": { weight: 61.5, updatedAt: "Hari ini" },
+        "l1_02": { weight: 54.2, updatedAt: "Hari ini" },
+        "l1_03": { weight: 68.0, updatedAt: "Hari ini" },
+        "l2_01": { weight: 41.8, updatedAt: "Hari ini" }
+      };
+      runLogs = [
+        {
+          id: "sample_1",
+          athleteId: "l1_01",
+          program: "ramadhan",
+          minggu: 1,
+          jarak: 5.5,
+          tanggal: "2027-02-08",
+          link: "https://www.strava.com/",
+          screenshot: "https://placehold.co/600x320/1E293B/FC4C02?text=Bukti+Strava+5.5+KM",
+          createdAt: Date.now() - 3600000
+        },
+        {
+          id: "sample_2",
+          athleteId: "l1_02",
+          program: "mingguan",
+          minggu: 1,
+          jarak: 3.2,
+          tanggal: "2026-11-12",
+          link: "https://www.strava.com/",
+          screenshot: "https://placehold.co/600x320/1E293B/10B981?text=Bukti+Strava+3.2+KM",
+          createdAt: Date.now() - 1800000
+        }
+      ];
+    }
+
+    // Berlangganan Data Publik Real-time (Terlihat Semua Orang)
+    function subscribePublicData() {
+      if (!db || !currentUser) return;
+
+      // 1. Listener Setoran Lari Publik
+      const logsCol = collection(db, 'artifacts', appId, 'public', 'data', 'silat_run_logs');
+      onSnapshot(logsCol, (snapshot) => {
+        const fetched = [];
+        snapshot.forEach((docSnap) => {
+          fetched.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        // Sort di memori (terbaru di atas)
+        fetched.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        runLogs = fetched;
+        refreshAllUI();
+      }, (error) => {
+        console.error("Error fetching run logs:", error);
+      });
+
+      // 2. Listener Berat Badan Publik
+      const weightsCol = collection(db, 'artifacts', appId, 'public', 'data', 'silat_athlete_weights');
+      onSnapshot(weightsCol, (snapshot) => {
+        const weightMap = {};
+        snapshot.forEach((docSnap) => {
+          weightMap[docSnap.id] = docSnap.data();
+        });
+        athleteWeights = weightMap;
+        refreshAllUI();
+      }, (error) => {
+        console.error("Error fetching weights:", error);
+      });
+    }
+
+    // ---------------------------------------------------------
+    // 3. NAVIGASI & POPULASI DROPDOWN / REFERENSI
+    // ---------------------------------------------------------
+    window.switchTab = function(tabName) {
+      const views = ['dashboard', 'setoran', 'atlet', 'referensi'];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${v}`);
+        btn.classList.remove('bg-strava', 'text-white', 'shadow-md', 'shadow-strava/25');
+        btn.classList.add('bg-slate-800/80', 'text-slate-300');
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabName}`);
+      activeBtn.classList.remove('bg-slate-800/80', 'text-slate-300');
+      activeBtn.classList.add('bg-strava', 'text-white', 'shadow-md', 'shadow-strava/25');
+
+      if (tabName === 'dashboard') {
+        renderOverviewChart();
+      }
+    };
+
+    function populateDropdownAndReferences() {
+      // Dropdown Pilih Atlet di Form Setoran
+      const selectAtlet = document.getElementById('input-atlet');
+      const optGroup1 = document.createElement('optgroup');
+      optGroup1.label = "TIM LAPIS 1 (13 Atlet)";
+      const optGroup2 = document.createElement('optgroup');
+      optGroup2.label = "TIM LAPIS 2 (16 Atlet)";
+
+      ATHLETES_MASTER.forEach((a, idx) => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = `${a.nama} — ${a.kelasLabel}`;
+        if (a.tim === "Lapis 1") optGroup1.appendChild(opt);
+        else optGroup2.appendChild(opt);
+      });
+
+      selectAtlet.appendChild(optGroup1);
+      selectAtlet.appendChild(optGroup2);
+
+      // Set default tanggal hari ini
+      document.getElementById('input-tanggal').valueAsDate = new Date();
+
+      // Render Tabel Referensi Resmi 2025
+      const tbodyRemaja = document.getElementById('table-ref-remaja');
+      tbodyRemaja.innerHTML = REF_REMAJA.map(r => `
+        <tr class="hover:bg-slate-800/40">
+          <td class="py-2.5 px-4 font-bold text-white">${r.kelas}</td>
+          <td class="py-2.5 px-4 text-amber-300 font-medium">${r.range}</td>
+          <td class="py-2.5 px-4 text-slate-400">${r.ket}</td>
+        </tr>
+      `).join('');
+
+      const tbodyPra = document.getElementById('table-ref-praremaja');
+      tbodyPra.innerHTML = REF_PRAREMAJA.map(r => `
+        <tr class="hover:bg-slate-800/40">
+          <td class="py-2.5 px-4 font-bold text-white">${r.kelas}</td>
+          <td class="py-2.5 px-4 text-orange-300 font-medium">${r.range}</td>
+          <td class="py-2.5 px-4 text-slate-400">${r.ket}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.toggleMingguField = function() {
+      const prog = document.getElementById('input-program').value;
+      const fieldMinggu = document.getElementById('field-minggu-ke');
+      if (prog === 'mingguan') fieldMinggu.classList.remove('hidden');
+      else fieldMinggu.classList.add('hidden');
+    };
+
+    // ---------------------------------------------------------
+    // 4. LOGIKA UPLOAD & KOMPRESI SCREENSHOT + SUBMIT SETORAN
+    // ---------------------------------------------------------
+    window.handleImageUpload = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // Kompres gambar ke lebar maks 550px kualitas 0.65 agar aman disimpan (< 150KB)
+          const canvas = document.createElement('canvas');
+          const maxWidth = 550;
+          const scale = img.width > maxWidth ? (maxWidth / img.width) : 1;
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          compressedBase64Image = canvas.toDataURL('image/jpeg', 0.65);
+
+          const preview = document.getElementById('screenshot-preview');
+          preview.src = compressedBase64Image;
+          preview.classList.remove('hidden');
+          document.getElementById('upload-placeholder').classList.add('hidden');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.handleSetoranSubmit = async function(e) {
+      e.preventDefault();
+      const athleteId = document.getElementById('input-atlet').value;
+      const program = document.getElementById('input-program').value;
+      const minggu = parseInt(document.getElementById('input-minggu').value) || 1;
+      const jarak = parseFloat(document.getElementById('input-jarak').value);
+      const tanggal = document.getElementById('input-tanggal').value;
+      const link = document.getElementById('input-link').value.trim();
+
+      if (!athleteId || isNaN(jarak) || !link || !compressedBase64Image) {
+        showToast("Lengkapi semua kolom dan foto screenshot Strava!", "error");
+        return;
+      }
+
+      const btn = document.getElementById('btn-submit-setoran');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Setoran...`;
+
+      const newLog = {
+        athleteId,
+        program,
+        minggu: program === 'mingguan' ? minggu : 0,
+        jarak,
+        tanggal,
+        link,
+        screenshot: compressedBase64Image,
+        createdAt: Date.now()
+      };
+
+      try {
+        if (db && currentUser) {
+          const logsCol = collection(db, 'artifacts', appId, 'public', 'data', 'silat_run_logs');
+          await addDoc(logsCol, newLog);
+        } else {
+          newLog.id = "local_" + Date.now();
+          runLogs.unshift(newLog);
+          refreshAllUI();
+        }
+
+        showToast("Setoran Strava berhasil dipublikasikan!", "success");
+        // Reset Form
+        document.getElementById('form-setoran').reset();
+        document.getElementById('input-tanggal').valueAsDate = new Date();
+        document.getElementById('screenshot-preview').classList.add('hidden');
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+        compressedBase64Image = "";
+        toggleMingguField();
+      } catch (err) {
+        console.error("Gagal menyimpan setoran:", err);
+        showToast("Gagal mengirim setoran. Coba perkecil ukuran gambar.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Kirim Setoran Sekarang`;
+      }
+    };
+
+    window.deleteRunLog = async function(logId) {
+      try {
+        if (db && currentUser && !logId.startsWith('sample_') && !logId.startsWith('local_')) {
+          await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'silat_run_logs', logId));
+        } else {
+          runLogs = runLogs.filter(item => item.id !== logId);
+          refreshAllUI();
+        }
+        showToast("Catatan setoran dihapus.", "info");
+      } catch (err) {
+        showToast("Gagal menghapus catatan.", "error");
+      }
+    };
+
+    // ---------------------------------------------------------
+    // 5. LOGIKA UPDATE & STATUS BERAT BADAN IDEAL
+    // ---------------------------------------------------------
+    function getWeightStatus(athlete, currentWeight) {
+      if (athlete.jenis === "Seni") {
+        return { code: "seni", label: "Kategori Seni", badgeClass: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
+      }
+      if (!currentWeight || isNaN(currentWeight)) {
+        return { code: "empty", label: "Belum Diukur", badgeClass: "bg-slate-800 text-slate-400 border-slate-700" };
+      }
+      if (currentWeight >= athlete.minKg && currentWeight <= athlete.maxKg) {
+        return { code: "ideal", label: "Ideal / Masuk Kelas", badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" };
+      }
+      if (currentWeight > athlete.maxKg) {
+        const diff = (currentWeight - athlete.maxKg).toFixed(1);
+        return { code: "over", label: `Overweight (+${diff} kg)`, badgeClass: "bg-red-500/20 text-red-300 border-red-500/40" };
+      }
+      const diff = (athlete.minKg - currentWeight).toFixed(1);
+      return { code: "under", label: `Underweight (-${diff} kg)`, badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/40" };
+    }
+
+    window.saveAthleteWeight = async function(athleteId) {
+      const inputEl = document.getElementById(`weight-input-${athleteId}`);
+      const val = parseFloat(inputEl.value);
+      if (isNaN(val) || val < 20 || val > 150) {
+        showToast("Masukkan angka berat badan yang valid (20 - 150 kg).", "error");
+        return;
+      }
+
+      const payload = {
+        weight: val,
+        updatedAt: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+      };
+
+      try {
+        if (db && currentUser) {
+          const weightDoc = doc(db, 'artifacts', appId, 'public', 'data', 'silat_athlete_weights', athleteId);
+          await setDoc(weightDoc, payload);
+        } else {
+          athleteWeights[athleteId] = payload;
+          refreshAllUI();
+        }
+        showToast("Berat badan diperbarui & terlihat oleh semua!", "success");
+      } catch (err) {
+        showToast("Gagal menyimpan berat badan.", "error");
+      }
+    };
+
+    window.setTeamFilterBB = function(team) {
+      currentBBTeamFilter = team;
+      document.querySelectorAll('.bb-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-strava', 'text-white');
+        btn.classList.add('text-slate-300');
+      });
+      const activeId = team === 'all' ? 'bb-tab-all' : (team === 'Lapis 1' ? 'bb-tab-lapis1' : 'bb-tab-lapis2');
+      const activeEl = document.getElementById(activeId);
+      activeEl.classList.remove('text-slate-300');
+      activeEl.classList.add('bg-strava', 'text-white');
+      renderBeratBadanList();
+    };
+
+    // ---------------------------------------------------------
+    // 6. PERHITUNGAN PROGRES & RENDER UI
+    // ---------------------------------------------------------
+    function getAthleteStats(athleteId) {
+      const logs = runLogs.filter(l => l.athleteId === athleteId);
+      const ramadhanKm = logs.filter(l => l.program === 'ramadhan').reduce((sum, l) => sum + Number(l.jarak || 0), 0);
+      const mingguanKm = logs.filter(l => l.program === 'mingguan').reduce((sum, l) => sum + Number(l.jarak || 0), 0);
+
+      // Breakdown per minggu (Minggu 1 - 4)
+      const weeklyBreakdown = [0, 0, 0, 0];
+      logs.filter(l => l.program === 'mingguan').forEach(l => {
+        const idx = Math.min(Math.max((l.minggu || 1) - 1, 0), 3);
+        weeklyBreakdown[idx] += Number(l.jarak || 0);
+      });
+
+      return { logs, ramadhanKm, mingguanKm, weeklyBreakdown };
+    }
+
+    function refreshAllUI() {
+      updateTopSummaryStats();
+      renderOverviewChart();
+      renderDashboardCards();
+      renderFeedSetoran();
+      renderBeratBadanList();
+    }
+
+    function updateTopSummaryStats() {
+      const totalRamadhan = runLogs.filter(l => l.program === 'ramadhan').reduce((s, l) => s + Number(l.jarak || 0), 0);
+      const totalMingguan = runLogs.filter(l => l.program === 'mingguan').reduce((s, l) => s + Number(l.jarak || 0), 0);
+
+      let idealCount = 0;
+      ATHLETES_MASTER.forEach(a => {
+        const w = athleteWeights[a.id]?.weight;
+        if (a.jenis === "Tanding" && getWeightStatus(a, w).code === "ideal") idealCount++;
+      });
+
+      document.getElementById('stat-total-ramadhan').innerHTML = `${totalRamadhan.toFixed(1)} <span class="text-xs font-sans font-normal text-slate-400">KM</span>`;
+      document.getElementById('stat-total-mingguan').innerHTML = `${totalMingguan.toFixed(1)} <span class="text-xs font-sans font-normal text-slate-400">KM</span>`;
+      document.getElementById('stat-bb-ideal').innerHTML = `${idealCount} <span class="text-xs font-sans font-normal text-slate-400">/ 27 Tanding</span>`;
+    }
+
+    window.renderOverviewChart = function() {
+      const teamFilter = document.getElementById('chart-team-filter').value;
+      const progFilter = document.getElementById('chart-program-filter').value;
+
+      const filteredAthletes = ATHLETES_MASTER.filter(a => teamFilter === 'all' || a.tim === teamFilter);
+      const labels = filteredAthletes.map(a => a.nama.split(' ').slice(0, 2).join(' '));
+      const dataValues = filteredAthletes.map(a => {
+        const stats = getAthleteStats(a.id);
+        return progFilter === 'ramadhan' ? Number(stats.ramadhanKm.toFixed(2)) : Number(stats.mingguanKm.toFixed(2));
+      });
+
+      const targetLine = progFilter === 'ramadhan' ? 40 : 12; // 40km sebulan vs 4 minggu x 3km = 12km
+      const barColor = progFilter === 'ramadhan' ? '#FC4C02' : '#10B981';
+
+      const ctx = document.getElementById('overviewChart').getContext('2d');
+      if (overviewChartInstance) overviewChartInstance.destroy();
+
+      overviewChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: progFilter === 'ramadhan' ? 'Total Joging Ramadhan (KM)' : 'Total Joging Mingguan (KM)',
+            data: dataValues,
+            backgroundColor: barColor,
+            borderRadius: 6,
+            maxBarThickness: 28
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          onClick: (e, elements) => {
+            if (elements.length > 0) {
+              const index = elements[0].index;
+              openAthleteModal(filteredAthletes[index].id);
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#CBD5E1', font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                afterLabel: (ctx) => `Target: ${targetLine} KM • Klik untuk detail`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94A3B8', font: { size: 10 }, maxRotation: 45, minRotation: 35 },
+              grid: { display: false }
+            },
+            y: {
+              beginAtZero: true,
+              suggestedMax: targetLine,
+              ticks: { color: '#94A3B8', font: { size: 11 } },
+              grid: { color: 'rgba(148, 163, 184, 0.1)' }
+            }
+          }
+        }
+      });
+    };
+
+    window.renderDashboardCards = function() {
+      const search = document.getElementById('search-dashboard-atlet').value.toLowerCase();
+      const timFilter = document.getElementById('filter-dashboard-tim').value;
+      const grid = document.getElementById('dashboard-athlete-grid');
+
+      const filtered = ATHLETES_MASTER.filter(a => {
+        const matchTeam = timFilter === 'all' || a.tim === timFilter;
+        const matchSearch = a.nama.toLowerCase().includes(search) || a.kelasLabel.toLowerCase().includes(search);
+        return matchTeam && matchSearch;
+      });
+
+      grid.innerHTML = filtered.map(a => {
+        const stats = getAthleteStats(a.id);
+        const pctRamadhan = Math.min((stats.ramadhanKm / 40) * 100, 100).toFixed(0);
+        const pctMingguan = Math.min((stats.mingguanKm / 3) * 100, 100).toFixed(0);
+        const timBadge = a.tim === "Lapis 1"
+          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+          : "bg-sky-500/20 text-sky-300 border-sky-500/30";
+
+        return `
+          <div onclick="openAthleteModal('${a.id}')" class="bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-strava/60 rounded-2xl p-4 cursor-pointer transition-all shadow-md group">
+            <div class="flex items-start justify-between gap-2 mb-2.5">
+              <div>
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border ${timBadge}">${a.tim}</span>
+                <h4 class="font-bold text-white text-sm mt-1.5 group-hover:text-strava transition-colors">${a.nama}</h4>
+                <p class="text-[11px] text-slate-400">${a.kelasLabel}</p>
+              </div>
+              <div class="w-8 h-8 rounded-xl bg-slate-800 group-hover:bg-strava text-slate-400 group-hover:text-white flex items-center justify-center transition-colors shrink-0">
+                <i class="fa-solid fa-chart-simple text-xs"></i>
+              </div>
+            </div>
+
+            <!-- Bar Progres Ramadhan 40KM -->
+            <div class="space-y-1 mt-3">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-slate-400">Ramadhan (40 KM)</span>
+                <span class="font-bold text-strava">${stats.ramadhanKm.toFixed(1)} KM (${pctRamadhan}%)</span>
+              </div>
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                <div class="bg-strava h-full rounded-full transition-all" style="width: ${pctRamadhan}%"></div>
+              </div>
+            </div>
+
+            <!-- Bar Progres Mingguan 3KM -->
+            <div class="space-y-1 mt-2.5">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-slate-400">Joging Mingguan (3 KM/Mg)</span>
+                <span class="font-bold text-emerald-400">${stats.mingguanKm.toFixed(1)} KM</span>
+              </div>
+              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                <div class="bg-emerald-400 h-full rounded-full transition-all" style="width: ${pctMingguan}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.renderFeedSetoran = function() {
+      const filterProg = document.getElementById('filter-feed-program').value;
+      const container = document.getElementById('feed-setoran-list');
+
+      const filteredLogs = runLogs.filter(l => filterProg === 'all' || l.program === filterProg);
+
+      if (filteredLogs.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm">
+            <i class="fa-solid fa-person-running text-3xl text-slate-600 mb-2"></i>
+            <p>Belum ada setoran lari pada kategori ini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredLogs.map(log => {
+        const athlete = ATHLETES_MASTER.find(a => a.id === log.athleteId) || { nama: "Atlet", tim: "-", kelasLabel: "-" };
+        const isRamadhan = log.program === 'ramadhan';
+        const progBadge = isRamadhan
+          ? `<span class="bg-strava/20 text-strava border border-strava/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">Ramadhan 40KM</span>`
+          : `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">Mingguan 3KM (Mg-${log.minggu || 1})</span>`;
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-bold text-white text-sm">${athlete.nama}</span>
+                  <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">${athlete.tim}</span>
+                  ${progBadge}
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">${athlete.kelasLabel} • Tanggal: ${log.tanggal}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-lg font-display font-bold text-white">${Number(log.jarak).toFixed(2)} <span class="text-xs font-sans text-strava">KM</span></div>
+              </div>
+            </div>
+
+            <!-- Screenshot Bukti Strava -->
+            <div class="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+              <img src="${log.screenshot}" onclick="openImageModal('${log.screenshot}')" alt="Screenshot Strava ${athlete.nama}" class="w-full max-h-56 object-cover cursor-zoom-in hover:opacity-95 transition-opacity">
+              <span class="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm">
+                <i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Perbesar Bukti
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <a href="${log.link}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-slate-800 hover:bg-strava text-white text-xs font-semibold py-2.5 px-3 rounded-xl text-center transition-colors flex items-center justify-center gap-2">
+                <i class="fa-brands fa-strava"></i> Buka Postingan Strava
+              </a>
+              <button onclick="deleteRunLog('${log.id}')" title="Hapus Setoran" class="bg-slate-800 hover:bg-red-600/80 text-slate-400 hover:text-white px-3 py-2.5 rounded-xl text-xs transition-colors">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.renderBeratBadanList = function() {
+      const search = document.getElementById('search-bb-atlet').value.toLowerCase();
+      const grid = document.getElementById('bb-athlete-grid');
+
+      const filtered = ATHLETES_MASTER.filter(a => {
+        const matchTeam = currentBBTeamFilter === 'all' || a.tim === currentBBTeamFilter;
+        const matchSearch = a.nama.toLowerCase().includes(search) || a.kelasLabel.toLowerCase().includes(search);
+        return matchTeam && matchSearch;
+      });
+
+      grid.innerHTML = filtered.map(a => {
+        const wData = athleteWeights[a.id];
+        const currentW = wData ? wData.weight : "";
+        const status = getWeightStatus(a, currentW);
+        const timBadge = a.tim === "Lapis 1"
+          ? "bg-amber-500/20 text-amber-300"
+          : "bg-sky-500/20 text-sky-300";
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${timBadge}">${a.tim}</span>
+                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${status.badgeClass}">${status.label}</span>
+              </div>
+              <h4 class="font-bold text-white text-sm">${a.nama}</h4>
+              <p class="text-xs text-slate-300 font-medium mt-0.5">${a.kelasLabel}</p>
+              <div class="mt-2 bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2 text-xs flex items-center justify-between">
+                <span class="text-slate-400">Batas Kelas:</span>
+                <span class="font-bold text-amber-400">${a.rangeText}</span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/80">
+              <label class="block text-[11px] text-slate-400 mb-1">
+                Berat Badan Aktual (kg) ${wData?.updatedAt ? `• <span class="text-slate-500">Update: ${wData.updatedAt}</span>` : ''}
+              </label>
+              <div class="flex gap-2">
+                <input type="number" id="weight-input-${a.id}" value="${currentW}" step="0.1" min="20" max="150" placeholder="Contoh: 54.5" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-strava">
+                <button onclick="saveAthleteWeight('${a.id}')" class="bg-strava hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors shrink-0">
+                  Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    // ---------------------------------------------------------
+    // 7. MODAL GRAFIK INDIVIDU & FULLSCREEN IMAGE
+    // ---------------------------------------------------------
+    window.openAthleteModal = function(athleteId) {
+      const athlete = ATHLETES_MASTER.find(a => a.id === athleteId);
+      if (!athlete) return;
+
+      const stats = getAthleteStats(athleteId);
+      const wData = athleteWeights[athleteId];
+      const wText = wData ? ` • BB Aktual: ${wData.weight} kg` : "";
+
+      document.getElementById('modal-tim-badge').innerText = `Tim ${athlete.tim}`;
+      document.getElementById('modal-kelas-badge').innerText = athlete.kelasLabel;
+      document.getElementById('modal-athlete-name').innerText = athlete.nama;
+      document.getElementById('modal-weight-info').innerText = `Batas Kelas: ${athlete.rangeText}${wText}`;
+
+      const pctRamadhan = Math.min((stats.ramadhanKm / 40) * 100, 100).toFixed(0);
+      const pctMingguan = Math.min((stats.mingguanKm / 12) * 100, 100).toFixed(0);
+
+      document.getElementById('modal-ramadhan-km').innerText = `${stats.ramadhanKm.toFixed(2)} KM`;
+      document.getElementById('modal-ramadhan-bar').style.width = `${pctRamadhan}%`;
+
+      document.getElementById('modal-mingguan-km').innerText = `${stats.mingguanKm.toFixed(2)} KM`;
+      document.getElementById('modal-mingguan-bar').style.width = `${pctMingguan}%`;
+
+      // Render Grafik Individu
+      const ctx = document.getElementById('individualChart').getContext('2d');
+      if (individualChartInstance) individualChartInstance.destroy();
+
+      individualChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Minggu 1 (3KM)', 'Minggu 2 (3KM)', 'Minggu 3 (3KM)', 'Minggu 4 (3KM)', 'Total Ramadhan (40KM)'],
+          datasets: [{
+            label: 'Capaian Lari (KM)',
+            data: [...stats.weeklyBreakdown, Number(stats.ramadhanKm.toFixed(2))],
+            backgroundColor: ['#10B981', '#10B981', '#10B981', '#10B981', '#FC4C02'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: '#94A3B8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.1)' } }
+          }
+        }
+      });
+
+      // Render Log Setoran Khusus Atlet Ini
+      const logsContainer = document.getElementById('modal-athlete-logs');
+      if (stats.logs.length === 0) {
+        logsContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Belum ada riwayat setoran lari untuk atlet ini.</p>`;
+      } else {
+        logsContainer.innerHTML = stats.logs.map(l => `
+          <div class="bg-slate-800/80 border border-slate-700/70 rounded-xl p-2.5 flex items-center justify-between gap-2 text-xs">
+            <div>
+              <span class="font-bold text-white">${l.jarak} KM</span>
+              <span class="text-slate-400">• ${l.program === 'ramadhan' ? 'Ramadhan 40KM' : `Mingguan (Mg-${l.minggu})`} (${l.tanggal})</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="openImageModal('${l.screenshot}')" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg text-[11px]">Foto</button>
+              <a href="${l.link}" target="_blank" class="bg-strava hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg text-[11px]">Strava</a>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('modal-athlete-detail').classList.remove('hidden');
+    };
+
+    window.closeAthleteModal = function() {
+      document.getElementById('modal-athlete-detail').classList.add('hidden');
+    };
+
+    window.openImageModal = function(src) {
+      document.getElementById('fullscreen-img').src = src;
+      document.getElementById('modal-image-preview').classList.remove('hidden');
+    };
+
+    // Inisialisasi Aplikasi saat Halaman Dimuat
+    populateDropdownAndReferences();
+    initFirebase();
+  </script>
+</body>
+</html>
+```
+
+Aplikasi pemantauan atlet Pencak Silat telah selesai dibuat dalam satu file HTML responsif yang mencakup seluruh data 29 atlet (Tim Lapis 1 & Tim Lapis 2), klasifikasi berat badan sesuai Peraturan Pertandingan Pencak Silat 2025, grafik perkembangan individu maupun tim secara real-time, serta formulir setoran bukti screenshot dan link Strava yang dapat dipantau bersama secara terbuka.
