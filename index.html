@@ -32,6 +32,7 @@
       const data = snapshot.val();
       if (data) {
         window.appData = data;
+        if (typeof populateSelects === 'function') populateSelects();
         if (typeof renderAtletCards === 'function') renderAtletCards();
         if (typeof renderTabelBerat === 'function') renderTabelBerat();
       } else {
@@ -399,6 +400,11 @@
     let chartMingguanInstance = null;
     let chartRamadhanInstance = null;
 
+    // Panggil langsung saat halaman dibuka agar dropdown terisi walau data cloud belum merespon
+    window.addEventListener('DOMContentLoaded', () => {
+      populateSelects();
+    });
+
     function switchTab(tabName, btnEl) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -433,7 +439,11 @@
     function populateSelects() {
       const selLari = document.getElementById('selectAtletLari');
       const selBerat = document.getElementById('selectAtletBerat');
-      if (selLari.options.length > 0) return;
+      if (!selLari || !selBerat) return;
+      
+      selLari.innerHTML = '';
+      selBerat.innerHTML = '';
+
       INITIAL_ATHLETES.forEach(a => {
         const label = `${a.nama} (${a.tim} - Kelas ${a.kelas} ${a.kategori})`;
         selLari.add(new Option(label, a.id));
@@ -449,7 +459,6 @@
     }
 
     function renderAtletCards() {
-      populateSelects();
       const grid = document.getElementById('athleteGrid');
       const search = document.getElementById('searchAtlet').value.toLowerCase();
       const timFilter = document.getElementById('filterTim').value;
