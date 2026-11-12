@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monitoring Atlet Pencak Silat - Real-Time Firebase</title>
+  <title>Monitoring Atlet Pencak Silat - Real-Time Database</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- SDK Firebase Firestore Real-time dengan Konfigurasi Proyek Anda -->
+  <!-- SDK Firebase Realtime Database -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     // Konfigurasi Firebase Anda
     const firebaseConfig = {
@@ -24,28 +24,35 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "sistem_silat", "data_atlet_global");
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'sistem_silat/data_atlet_global');
 
     // Mendengarkan perubahan data secara Real-Time di semua HP
-    onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        window.appData = docSnap.data().payload;
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        window.appData = data;
         if (typeof renderAtletCards === 'function') renderAtletCards();
         if (typeof renderTabelBerat === 'function') renderTabelBerat();
       } else {
-        inisialisasiDataCloud(db, docRef);
+        inisialisasiDataCloud();
       }
     });
 
-    window.simpanKeCloud = async function(newData) {
-      try {
-        await setDoc(docRef, { payload: newData, updatedAt: new Date().toISOString() });
-      } catch (e) {
-        console.error("Gagal sinkron ke cloud: ", e);
+    window.simpanKeCloud = function(newData) {
+      set(dbRef, newData).catch((error) => {
+        console.error("Gagal sinkron ke cloud: ", error);
         alert("Gagal menyimpan ke server cloud.");
-      }
+      });
     };
+
+    function inisialisasiDataCloud() {
+      const initial = {};
+      INITIAL_ATHLETES.forEach(a => {
+        initial[a.id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      });
+      window.simpanKeCloud(initial);
+    }
   </script>
 
   <style>
@@ -392,13 +399,6 @@
     let chartMingguanInstance = null;
     let chartRamadhanInstance = null;
 
-    function inisialisasiDataCloud(db, docRef) {
-      INITIAL_ATHLETES.forEach(a => {
-        window.appData[a.id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
-      });
-      window.simpanKeCloud(window.appData);
-    }
-
     function switchTab(tabName, btnEl) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -460,8 +460,8 @@
         if (!a.nama.toLowerCase().includes(search)) return;
 
         const d = window.appData[a.id] || { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
-        const totalMingguan = d.mingguan.reduce((acc, v) => acc + v, 0);
-        const totalRamadhan = d.ramadhan.reduce((acc, v) => acc + v, 0);
+        const totalMingguan = (d.mingguan || [0,0,0,0]).reduce((acc, v) => acc + v, 0);
+        const totalRamadhan = (d.ramadhan || [0,0,0,0]).reduce((acc, v) => acc + v, 0);
 
         const card = document.createElement('div');
         card.className = 'athlete-card';
@@ -484,7 +484,7 @@
               <div class="progress-bar"><div class="progress-fill ramadhan" style="width: ${Math.min(100, (totalRamadhan/40)*100)}%"></div></div>
             </div>
           </div>
-          <button class="btn btn-outline" onclick="bukaModalGrafik(${a.id})">📊 Grafik & Bukti Strava (${d.riwayat.length})</button>
+          <button class="btn btn-outline" onclick="bukaModalGrafik(${a.id})">📊 Grafik & Bukti Strava (${(d.riwayat || []).length})</button>
         `;
         grid.appendChild(card);
       });
@@ -498,6 +498,11 @@
       const link = document.getElementById('inputStrava').value.trim();
 
       if (isNaN(km) || km <= 0) { alert("Masukkan jarak KM yang valid!"); return; }
+
+      if (!window.appData[id]) {
+        window.appData[id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      }
+      if (!window.appData[id].riwayat) window.appData[id].riwayat = [];
 
       window.appData[id][program][minggu] += km;
       window.appData[id].riwayat.unshift({
@@ -521,7 +526,11 @@
       const berat = parseFloat(document.getElementById('inputBerat').value);
       if (isNaN(berat) || berat < 20 || berat > 150) { alert("Masukkan berat badan valid!"); return; }
 
+      if (!window.appData[id]) {
+        window.appData[id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      }
       window.appData[id].berat = berat;
+
       window.simpanKeCloud(window.appData);
       document.getElementById('inputBerat').value = '';
       alert("Berat badan berhasil diperbarui!");
@@ -569,7 +578,8 @@
       document.getElementById('modalInfo').innerText = `${atlet.tim} • Kelas ${atlet.kelas} ${atlet.kategori} • BB: ${d.berat ? d.berat + ' kg' : '-'}`;
 
       const riwayatEl = document.getElementById('modalRiwayat');
-      riwayatEl.innerHTML = d.riwayat.length === 0 ? '<p style="color:#888;">Belum ada riwayat.</p>' : d.riwayat.map(r => `
+      const listRiwayat = d.riwayat || [];
+      riwayatEl.innerHTML = listRiwayat.length === 0 ? '<p style="color:#888;">Belum ada riwayat.</p>' : listRiwayat.map(r => `
         <div class="riwayat-card">
           <div style="display: flex; justify-content: space-between;">
             <div><strong>${r.program} (Mgg ${r.minggu})</strong> • <span style="color:var(--primary);">${r.km} KM</span><br><small>${r.tanggal}</small></div>
@@ -585,11 +595,12 @@
 
       chartMingguanInstance = new Chart(document.getElementById('chartMingguan').getContext('2d'), {
         type: 'bar',
-        data: { labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'], datasets: [{ label: 'KM', data: d.mingguan, backgroundColor: '#b91c1c' }] },
+        data: { labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'], datasets: [{ label: 'KM', data: d.mingguan || [0,0,0,0], backgroundColor: '#b91c1c' }] },
         options: { responsive: true, scales: { y: { beginAtZero: true } } }
       });
 
-      let kum = 0; const kumArr = []; d.ramadhan.forEach(v => { kum += v; kumArr.push(kum); });
+      let kum = 0; const kumArr = []; 
+      (d.ramadhan || [0,0,0,0]).forEach(v => { kum += v; kumArr.push(kum); });
       chartRamadhanInstance = new Chart(document.getElementById('chartRamadhan').getContext('2d'), {
         type: 'line',
         data: { labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'], datasets: [{ label: 'Akumulasi', data: kumArr, borderColor: '#d97706', fill: true, backgroundColor: 'rgba(245,158,11,0.2)' }] },
