@@ -77,8 +77,13 @@
       background: linear-gradient(135deg, var(--secondary), var(--primary-dark));
       color: white; padding: 20px 16px; text-align: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;
     }
-    header h1 { font-size: 1.35rem; margin-bottom: 4px; }
+    .header-logo {
+      width: 55px; height: 55px; border-radius: 50%; object-fit: cover;
+      border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); background: white;
+    }
+    header h1 { font-size: 1.35rem; margin-bottom: 2px; }
     header p { font-size: 0.85rem; color: #cbd5e1; }
 
     .nav-tabs {
@@ -162,8 +167,11 @@
 <body>
 
   <header>
-    <h1>🥋 MONITORING ATLET PENCAK SILAT</h1>
-    <p>Sinkronisasi Otomatis Real-Time & Kontrol Berat Badan</p>
+    <img src="logo.jpg" alt="Logo Satu Tigaraksa" class="header-logo" onerror="this.style.display='none'">
+    <div>
+      <h1>🥋 MONITORING ATLET PENCAK SILAT</h1>
+      <p>Sinkronisasi Otomatis Real-Time & Kontrol Berat Badan</p>
+    </div>
   </header>
 
   <nav class="nav-tabs">
@@ -560,6 +568,21 @@
       alert("Berat badan berhasil diperbarui!");
     }
 
+    function hapusRiwayat(atletId, index) {
+      if (!confirm("Yakin ingin menghapus riwayat setoran lari ini?")) return;
+      const riwayatItem = window.appData[atletId].riwayat[index];
+      if (riwayatItem) {
+        const progKey = riwayatItem.program === 'Mingguan' ? 'mingguan' : 'ramadhan';
+        const mggIdx = riwayatItem.minggu - 1;
+        window.appData[atletId][progKey][mggIdx] = Math.max(0, window.appData[atletId][progKey][mggIdx] - riwayatItem.km);
+        window.appData[atletId].riwayat.splice(index, 1);
+        window.simpanKeCloud(window.appData);
+        bukaModalGrafik(atletId);
+        renderAtletCards();
+        alert("Riwayat berhasil dihapus!");
+      }
+    }
+
     function renderTabelBerat() {
       const tbody = document.getElementById('tbodyBerat');
       const filter = document.getElementById('filterTimBerat').value;
@@ -603,11 +626,14 @@
 
       const riwayatEl = document.getElementById('modalRiwayat');
       const listRiwayat = d.riwayat || [];
-      riwayatEl.innerHTML = listRiwayat.length === 0 ? '<p style="color:#888;">Belum ada riwayat.</p>' : listRiwayat.map(r => `
+      riwayatEl.innerHTML = listRiwayat.length === 0 ? '<p style="color:#888;">Belum ada riwayat.</p>' : listRiwayat.map((r, idx) => `
         <div class="riwayat-card">
-          <div style="display: flex; justify-content: space-between;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div><strong>${r.program} (Mgg ${r.minggu})</strong> • <span style="color:var(--primary);">${r.km} KM</span><br><small>${r.tanggal}</small></div>
-            ${r.link !== '#' ? `<a href="${r.link}" target="_blank" style="color:#fc4c02; font-weight:bold; text-decoration:none;">Strava ↗</a>` : ''}
+            <div style="display: flex; gap: 8px; align-items: center;">
+              ${r.link !== '#' ? `<a href="${r.link}" target="_blank" style="color:#fc4c02; font-weight:bold; text-decoration:none;">Strava ↗</a>` : ''}
+              <button onclick="hapusRiwayat(${id}, ${idx})" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; cursor:pointer;">Hapus</button>
+            </div>
           </div>
           ${r.gambar ? `<img src="${r.gambar}" class="riwayat-img" onclick="window.open('${r.gambar}', '_blank')">` : ''}
         </div>
