@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arena 3D Wasit, Animasi Otot & Monitoring Silat - Satu Tigaraksa</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Three.js untuk Render 3D & Animasi Otot -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- SDK Firebase Realtime Database -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNkwVtOOkN7Q4ex_/x/HUCRr4P-Rfopug",
+      authDomain: "psdk-fd9d9.firebaseapp.com",
+      databaseURL: "https://psdk-fd9d9-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "psdk-fd9d9",
+      storageBucket: "psdk-fd9d9.firebasestorage.app",
+      messagingSenderId: "794255823328",
+      appId: "1:794255823328:web:5a76ed3af46b142c8ecasd",
+      measurementId: "G-PZFHMVKEFN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'sistem_silat/data_atlet_global');
+
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        window.appData = data;
+        if (typeof populateSelects === 'function') populateSelects();
+        if (typeof renderAtletCards === 'function') renderAtletCards();
+        if (typeof renderTabelBerat === 'function') renderTabelBerat();
+        if (typeof updateFisikPreview === 'function') updateFisikPreview();
+      } else {
+        inisialisasiDataCloud();
+      }
+    });
+
+    window.simpanKeCloud = function(newData) {
+      set(dbRef, newData).catch((error) => {
+        console.error("Gagal sinkron ke cloud: ", error);
+        alert("Gagal menyimpan ke server cloud.");
+      });
+    };
+
+    function inisialisasiDataCloud() {
+      const initial = {};
+      INITIAL_ATHLETES.forEach(a => {
+        initial[a.id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      });
+      window.simpanKeCloud(initial);
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-dark: #060a17;
+      --card-bg: rgba(15, 28, 63, 0.88);
+      --gold: #d4af37;
+      --gold-light: #fef08a;
+      --gold-glow: rgba(212, 175, 55, 0.35);
+      --blue-accent: #1d4ed8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-gold: rgba(212, 175, 55, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    
+    body {
+      background: radial-gradient(circle at 50% 10%, #172a5e 0%, var(--bg-dark) 80%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      padding-bottom: 60px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-ornament {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      background: linear-gradient(135deg, #091128 0%, #1e3a8a 100%);
+      border-bottom: 2px solid var(--gold);
+      color: white;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-logo {
+      width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold-glow); background: white;
+    }
+
+    header h1 { font-size: 1.35rem; color: var(--gold-light); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    header p { font-size: 0.85rem; color: #cbd5e1; }
+
+    .nav-tabs {
+      display: flex; background: rgba(9, 17, 40, 0.95); border-bottom: 1px solid var(--border-gold);
+      position: sticky; top: 0; z-index: 99; overflow-x: auto; backdrop-filter: blur(8px);
+    }
+    .tab-btn {
+      flex: 1; padding: 14px 12px; border: none; background: none; font-weight: 700;
+      font-size: 0.82rem; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent;
+      white-space: nowrap; transition: all 0.3s ease;
+    }
+    .tab-btn:hover { color: var(--gold-light); }
+    .tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); background: rgba(212, 175, 55, 0.14); }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px 16px; position: relative; z-index: 5; }
+
+    .section { display: none; }
+    .section.active { display: block; animation: jurusSlideEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    @keyframes jurusSlideEnter {
+      0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card {
+      background: var(--card-bg); border-radius: 14px; padding: 18px;
+      margin-bottom: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); border: 1px solid var(--border-gold); backdrop-filter: blur(10px);
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px; }
+    .card-title { font-size: 1.08rem; font-weight: 700; color: var(--gold-light); }
+
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    input[type="text"], input[type="number"], input[type="url"], select {
+      padding: 10px 14px; border: 1px solid var(--border-gold); border-radius: 8px; font-size: 0.9rem;
+      background: rgba(6, 10, 23, 0.9); color: white; width: 100%; outline: none;
+    }
+    .filter-bar input, .filter-bar select { flex: 1; min-width: 150px; }
+
+    .upload-box {
+      border: 2px dashed var(--gold); border-radius: 10px; padding: 18px; text-align: center;
+      background: rgba(212, 175, 55, 0.05); cursor: pointer; position: relative;
+    }
+    .upload-box input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    #previewScreenshot { max-width: 100%; max-height: 200px; margin: 10px auto 0; border-radius: 8px; display: none; border: 1px solid var(--gold); }
+
+    .athlete-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+    .athlete-card {
+      background: linear-gradient(145deg, rgba(15, 28, 63, 0.9), rgba(9, 17, 40, 0.95));
+      border: 1px solid var(--border-gold); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
+    .badge-lapis1 { background: rgba(212, 175, 55, 0.2); color: var(--gold-light); border: 1px solid var(--gold); }
+    .badge-lapis2 { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6; }
+    .badge-ok { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+    .badge-warn { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid #f59e0b; }
+    .badge-over { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+
+    .progress-wrap { margin: 12px 0; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 5px; color: #cbd5e1; font-weight: 600; }
+    .progress-bar { height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #60a5fa); border-radius: 99px; }
+    .progress-fill.ramadhan { background: linear-gradient(90deg, #b45309, var(--gold)); }
+
+    .btn { padding: 10px 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: center; width: 100%; transition: all 0.25s; }
+    .btn-primary { background: linear-gradient(135deg, #b45309, var(--gold)); color: #060a17; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-blue { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: 1px solid var(--gold); }
+    .btn-outline { background: rgba(212, 175, 55, 0.08); border: 1px solid var(--gold); color: var(--gold-light); margin-top: 10px; }
+
+    /* STYLING ARENA 3D ANIMASI OTOT & WASIT */
+    .canvas-3d-wrapper {
+      width: 100%;
+      height: 440px;
+      border-radius: 14px;
+      border: 2px solid var(--gold);
+      overflow: hidden;
+      position: relative;
+      background: #02040a;
+      box-shadow: 0 0 35px rgba(212, 175, 55, 0.35);
+    }
+    #canvas3dContainer {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #canvas3dContainer:active { cursor: grabbing; }
+
+    .hud-overlay-top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hud-card {
+      background: rgba(6, 10, 23, 0.88);
+      border: 1px solid var(--gold);
+      padding: 8px 14px;
+      border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+    .hud-bottom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6, 10, 23, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      color: var(--gold-light);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .referee-box {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(30, 58, 138, 0.2));
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .referee-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .ref-column {
+      background: rgba(6, 10, 23, 0.75);
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .ref-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .muscle-panel {
+      background: rgba(15, 28, 63, 0.75);
+      border: 1px solid var(--border-gold);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .muscle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .muscle-stat-card {
+      background: rgba(6, 10, 23, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .food-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 10px; }
+    .food-item { background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--gold); padding: 12px; border-radius: 6px; }
+    .food-item h4 { color: var(--gold-light); margin-bottom: 4px; font-size: 0.95rem; }
+    .food-item p { font-size: 0.82rem; color: var(--text-muted); }
+
+    .manual-controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .ctrl-panel {
+      background: rgba(6, 10, 23, 0.7);
+      border: 1px solid var(--border-gold);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .action-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .btn-skill {
+      padding: 7px 6px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-skill-red { background: rgba(220, 38, 38, 0.35); border-color: #ef4444; }
+    .btn-skill-red:hover { background: #dc2626; }
+    .btn-skill-blue { background: rgba(37, 99, 235, 0.35); border-color: #3b82f6; }
+    .btn-skill-blue:hover { background: #2563eb; }
+    .btn-ref {
+      padding: 7px 6px;
+      font-size: 0.73rem;
+      border-radius: 6px;
+      border: 1px solid var(--gold);
+      background: rgba(212, 175, 55, 0.2);
+      color: var(--gold-light);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-ref:hover { background: var(--gold); color: #060a17; }
+
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .stat-box {
+      background: rgba(15, 28, 63, 0.7);
+      border: 1px solid var(--border-gold);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.2rem; font-weight: bold; color: var(--gold-light); }
+
+    .log-combat {
+      background: rgba(3, 6, 15, 0.92);
+      border: 1px solid var(--border-gold);
+      border-radius: 8px;
+      padding: 12px;
+      height: 110px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      text-align: left;
+      color: #cbd5e1;
+      font-family: monospace;
+      margin-top: 14px;
+    }
+
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 11px 12px; text-align: left; border-bottom: 1px solid rgba(212, 175, 55, 0.15); }
+    th { background: rgba(212, 175, 55, 0.12); font-weight: 700; color: var(--gold-light); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--gold-light); }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(3, 6, 15, 0.85); z-index: 200; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(6px); }
+    .modal.open { display: flex; }
+    .modal-content { background: #0f1c3f; border: 2px solid var(--gold); border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 22px; color: white; }
+    .close-btn { background: rgba(212, 175, 55, 0.2); border: 1px solid var(--gold); color: var(--gold-light); padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .riwayat-card { border: 1px solid var(--border-gold); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: rgba(6, 10, 23, 0.7); }
+    .riwayat-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid var(--gold); cursor: pointer; }
+
+    footer { text-align: center; padding: 24px 16px; margin-top: 30px; border-top: 1px solid var(--border-gold); color: var(--text-muted); font-size: 0.85rem; background: rgba(6, 10, 23, 0.7); }
+    footer .ig-links { display: flex; justify-content: center; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+    footer a { color: var(--gold-light); text-decoration: none; font-weight: 600; padding: 6px 12px; border: 1px solid var(--border-gold); border-radius: 20px; transition: all 0.3s; }
+    footer a:hover { background: var(--gold); color: #060a17; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-ornament"></div>
+
+  <header>
+    <img src="logo.jpg" alt="Logo Satu Tigaraksa" class="header-logo" onerror="this.style.display='none'">
+    <div>
+      <h1>🥋 ARENA 3D WASIT, ANIMASI OTOT & MONITORING SILAT</h1>
+      <p>Satu Tigaraksa • Simulasi Animasi Otot 3D, Wasit & Nutrisi Terpadu</p>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 Grafik & Atlet</button>
+    <button class="tab-btn" onclick="switchTab('simulasi', this)">🎮 Arena 3D, Animasi Otot & Wasit</button>
+    <button class="tab-btn" onclick="switchTab('setoran', this)">🏃 Input Setoran</button>
+    <button class="tab-btn" onclick="switchTab('berat', this)">⚖️ List Berat Badan</button>
+    <button class="tab-btn" onclick="switchTab('aturan', this)">📋 Standar Kelas</button>
+  </nav>
+
+  <div class="container">
+
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="section active">
+      <div class="card" style="background: rgba(212, 175, 55, 0.1); border-color: var(--gold);">
+        <div style="font-weight: 700; color: var(--gold-light); margin-bottom: 4px;">📅 Target Program Latihan Pesilat:</div>
+        <ul style="font-size: 0.82rem; color: #e2e8f0; padding-left: 18px; line-height: 1.5;">
+          <li>Joging Reguler: Minimal <strong style="color: var(--gold-light);">3 KM / minggu</strong>.</li>
+          <li>Program Ramadhan (07 Feb – 07 Mar 2027): Akumulasi <strong style="color: var(--gold-light);">40 KM</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchAtlet" placeholder="🔍 Cari nama pesilat..." oninput="renderAtletCards()">
+        <select id="filterTim" onchange="renderAtletCards()">
+          <option value="ALL">Semua Tim (31 Atlet)</option>
+          <option value="Lapis 1">Tim Lapis 1 (13 Atlet)</option>
+          <option value="Lapis 2">Tim Lapis 2 (18 Atlet)</option>
+        </select>
+      </div>
+
+      <div class="athlete-grid" id="athleteGrid"></div>
+    </div>
+
+    <!-- TAB 2: ARENA 3D, ANIMASI OTOT & WASIT -->
+    <div id="tab-simulasi" class="section">
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">⚔️ Pengaturan Pesilat & Simulasi Animasi Otot 3D</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="font-size:0.85rem; color:#f87171; font-weight:700;">Sudut Merah (Pesilat 1)</label>
+            <select id="selMerah" style="margin-top:6px; border-color:#ef4444;" onchange="updateFisikPreview()"></select>
+          </div>
+          <div>
+            <label style="font-size:0.85rem; color:#60a5fa; font-weight:700;">Sudut Biru (Pesilat 2)</label>
+            <select id="selBiru" style="margin-top:6px; border-color:#3b82f6;" onchange="updateFisikPreview()"></select>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="mulaiSimulasi3D()" style="flex:2;">🎬 Mulai Pertandingan 3D & Animasi Otot</button>
+          <button class="btn btn-blue" onclick="resetSimulasi3D()" style="flex:1; background:#475569;">Reset Arena</button>
+        </div>
+      </div>
+
+      <!-- ARENA VIEWPORT 3D -->
+      <div class="card">
+        <div class="canvas-3d-wrapper">
+          <div class="hud-overlay-top">
+            <div class="hud-card" style="border-color:#ef4444;">
+              <div style="font-size:0.75rem; color:#f87171; font-weight:bold;" id="labelMerah">MERAH</div>
+              <div style="font-size:1.5rem; font-weight:800; color:white;" id="skorMerah">0</div>
+              <div style="font-size:0.7rem; color:#cbd5e1;">Peringatan: <span id="warnMerah">0</span></div>
+            </div>
+            <div class="hud-card" style="text-align:center;">
+              <div style="font-size:0.8rem; color:var(--gold); font-weight:bold;" id="timerRonde">03:00</div>
+              <div style="font-size:0.7rem; color:#cbd5e1;" id="infoBabak">BABAK 1</div>
+            </div>
+            <div class="hud-card" style="border-color:#3b82f6; text-align:right;">
+              <div style="font-size:0.75rem; color:#60a5fa; font-weight:bold;" id="labelBiru">BIRU</div>
+              <div style="font-size:1.5rem; font-weight:800; color:white;" id="skorBiru">0</div>
+              <div style="font-size:0.7rem; color:#cbd5e1;">Peringatan: <span id="warnBiru">0</span></div>
+            </div>
+          </div>
+
+          <div id="canvas3dContainer"></div>
+          <div class="hud-bottom-hint">🖱️ Klik & Geser untuk putar kamera 360° • Otot berdenyut & membesar saat eksekusi jurus</div>
+        </div>
+
+        <!-- PANEL ANALISIS PERKEMBANGAN OTOT & HIPERTROFI -->
+        <div class="muscle-panel">
+          <div style="font-size:0.88rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 8px;">💪 ANALISIS ANIMASI & PERKEMBANGAN OTOT 3D 📈</div>
+          <div class="muscle-grid">
+            <div class="muscle-stat-card" style="border-color:#ef4444;">
+              <div style="font-size:0.78rem; color:#f87171; font-weight:bold; margin-bottom:4px;" id="titleOtotMerah">Statistik Otot Merah</div>
+              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotMerah">Pilih pesilat merah untuk melihat data otot.</div>
+            </div>
+            <div class="muscle-stat-card" style="border-color:#3b82f6;">
+              <div style="font-size:0.78rem; color:#60a5fa; font-weight:bold; margin-bottom:4px;" id="titleOtotBiru">Statistik Otot Biru</div>
+              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotBiru">Pilih pesilat biru untuk melihat data otot.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL KELOMPOK MAKANAN UNTUK OTOT -->
+        <div class="muscle-panel" style="margin-top: 14px;">
+          <div style="font-size:0.88rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 8px;">🍽️ KELOMPOK MAKANAN NUTRISI PEMULIHAN OTOT PESILAT</div>
+          <div class="food-grid">
+            <div class="food-item">
+              <h4>1. Sumber Protein Tinggi</h4>
+              <p>Dada ayam rebus, daging sapi tanpa lemak, ikan tuna, telur utuh, tempe, dan tahu putih.</p>
+            </div>
+            <div class="food-item">
+              <h4>2. Karbohidrat Kompleks</h4>
+              <p>Nasi merah, oatmeal, ubi jalar, dan kentang rebus untuk suplai glikogen otot secara maksimal.</p>
+            </div>
+            <div class="food-item">
+              <h4>3. Lemak Sehat</h4>
+              <p>Alpukat, minyak zaitun, dan kacang almond untuk kestabilan hormon dan tenaga.</p>
+            </div>
+            <div class="food-item">
+              <h4>4. Vitamin & Mineral</h4>
+              <p>Pisang (cegah kram betis), bayam & brokoli (zat besi & magnesium otot).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL KONTROL WASIT -->
+        <div class="referee-box">
+          <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 6px;">🚩 PANEL KONTROL WASIT / DEWAN JURI 🚩</div>
+          <div class="referee-grid">
+            <div class="ref-column" style="border-color:rgba(239,68,68,0.4);">
+              <div style="font-size:0.75rem; color:#f87171; font-weight:bold;">Tindakan Wasit (Sudut Merah):</div>
+              <div class="ref-btns">
+                <button class="btn-ref" onclick="aksiWasit('merah', 'binaan')">⚠️ Binaan (1)</button>
+                <button class="btn-ref" onclick="aksiWasit('merah', 'peringatan')">🛑 Peringatan (-5)</button>
+                <button class="btn-ref" onclick="aksiWasit('merah', 'jatuhan')">🤼 Jatuhan (+3)</button>
+                <button class="btn-ref" onclick="aksiWasit('merah', 'diskalifikasi')" style="background:rgba(239,68,68,0.3); color:#fca5a5;">❌ Diskualifikasi</button>
+              </div>
+            </div>
+            <div class="ref-column" style="border-color:rgba(59,130,246,0.4);">
+              <div style="font-size:0.75rem; color:#60a5fa; font-weight:bold;">Tindakan Wasit (Sudut Biru):</div>
+              <div class="ref-btns">
+                <button class="btn-ref" onclick="aksiWasit('biru', 'binaan')">⚠️ Binaan (1)</button>
+                <button class="btn-ref" onclick="aksiWasit('biru', 'peringatan')">🛑 Peringatan (-5)</button>
+                <button class="btn-ref" onclick="aksiWasit('biru', 'jatuhan')">🤼 Jatuhan (+3)</button>
+                <button class="btn-ref" onclick="aksiWasit('biru', 'diskalifikasi')" style="background:rgba(59,130,246,0.3); color:#93c5fd;">❌ Diskualifikasi</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="btn btn-primary" onclick="togglePauseMatch()" id="btnPause" style="flex:1; padding:8px;">⏸️ Hentikan / Pause Laga</button>
+            <button class="btn btn-blue" onclick="keluarSanksi()" style="flex:1; background:#334155; padding:8px;">📢 Beri Perintah 'BERHENTI'</button>
+          </div>
+        </div>
+
+        <!-- STATISTIK & KONTROL MANUAL -->
+        <div class="stats-panel">
+          <div class="stat-box">
+            <div style="font-size:0.75rem; color:#cbd5e1;">Total Pukulan</div>
+            <div class="stat-num" id="statPukul">0</div>
+          </div>
+          <div class="stat-box">
+            <div style="font-size:0.75rem; color:#cbd5e1;">Total Tendangan</div>
+            <div class="stat-num" id="statTendang">0</div>
+          </div>
+          <div class="stat-box">
+            <div style="font-size:0.75rem; color:#cbd5e1;">Total Bantingan</div>
+            <div class="stat-num" id="statBanting">0</div>
+          </div>
+        </div>
+
+        <div class="manual-controls-grid">
+          <div class="ctrl-panel" style="border-color:rgba(239,68,68,0.5);">
+            <div style="font-size:0.78rem; color:#f87171; font-weight:bold;">🎮 Kontrol Jurus Merah:</div>
+            <div class="action-btns">
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'pukul')">👊 Pukulan (+1)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tendang')">🦵 Tendangan (+2)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'banting')">🤼 Bantingan (+3)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tangkis')">🛡️ Tangkisan</button>
+            </div>
+          </div>
+          <div class="ctrl-panel" style="border-color:rgba(59,130,246,0.5);">
+            <div style="font-size:0.78rem; color:#60a5fa; font-weight:bold;">🎮 Kontrol Jurus Biru:</div>
+            <div class="action-btns">
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'pukul')">👊 Pukulan (+1)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tendang')">🦵 Tendangan (+2)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'banting')">🤼 Bantingan (+3)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tangkis')">🛡️ Tangkisan</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="log-combat" id="logCombat">
+          [Arena 3D Aktif] Model 3D dilengkapi animasi kontraksi otot (hipertrofi) real-time sesuai setoran lari atlet!
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: INPUT SETORAN -->
+    <div id="tab-setoran" class="section">
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 14px;">🏃 Setor Progres Lari & Screenshot Strava</div>
+        <div class="form-group">
+          <label>Pilih Nama Atlet</label>
+          <select id="selectAtletLari"></select>
+        </div>
+        <div class="form-group">
+          <label>Jenis Program</label>
+          <select id="jenisProgram">
+            <option value="mingguan">Program Mingguan (Target 3 KM/minggu)</option>
+            <option value="ramadhan">Program Ramadhan (07 Feb - 07 Mar 2027 | Target 40 KM)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Minggu Ke-</label>
+            <select id="mingguKe">
+              <option value="1">Minggu ke-1</option>
+              <option value="2">Minggu ke-2</option>
+              <option value="3">Minggu ke-3</option>
+              <option value="4">Minggu ke-4</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Jarak (KM)</label>
+            <input type="number" id="inputKm" step="0.01" placeholder="Contoh: 3.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Link Postingan Strava</label>
+          <input type="url" id="inputStrava" placeholder="https://strava.app.link/...">
+        </div>
+        <div class="form-group">
+          <label>Upload Screenshot Bukti Strava</label>
+          <div class="upload-box">
+            <span id="labelUpload" style="font-size: 0.85rem; color: var(--gold-light); font-weight: 600;">📸 Pilih Foto Screenshot</span>
+            <input type="file" id="inputFileScreenshot" accept="image/*" onchange="prosesGambar(event)">
+            <img id="previewScreenshot" alt="Pratinjau">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="simpanLari()">Simpan & Kirim ke Cloud Server</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 14px;">⚖️ Update Berat Badan Atlet</div>
+        <div class="form-group">
+          <label>Pilih Nama Atlet</label>
+          <select id="selectAtletBerat"></select>
+        </div>
+        <div class="form-group">
+          <label>Berat Badan Aktual (KG)</label>
+          <input type="number" id="inputBerat" step="0.1" placeholder="Contoh: 53.5">
+        </div>
+        <button class="btn btn-blue" onclick="simpanBerat()">Simpan Berat Badan</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: LIST BERAT BADAN -->
+    <div id="tab-berat" class="section">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚖️ Monitoring Berat Badan & Kelas Tanding</span>
+          <select id="filterTimBerat" onchange="renderTabelBerat()" style="max-width: 180px;">
+            <option value="ALL">Semua Tim</option>
+            <option value="Lapis 1">Tim Lapis 1</option>
+            <option value="Lapis 2">Tim Lapis 2</option>
+          </select>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Atlet</th>
+                <th>Tim</th>
+                <th>Kategori & Kelas</th>
+                <th>Batas Kelas</th>
+                <th>BB Aktual</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyBerat"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: STANDAR KELAS & ATURAN -->
+    <div id="tab-aturan" class="section">
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">📋 Standar Kelas Berat Badan (Peraturan Pencak Silat)</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Kelas</th>
+                <th>Pra Remaja</th>
+                <th>Remaja Putra</th>
+                <th>Remaja Putri</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Kelas A</strong></td><td>30 - 33 kg</td><td>39 - 43 kg</td><td>39 - 43 kg</td></tr>
+              <tr><td><strong>Kelas B</strong></td><td>&gt;33 - 36 kg</td><td>&gt;43 - 47 kg</td><td>&gt;43 - 47 kg</td></tr>
+              <tr><td><strong>Kelas C</strong></td><td>&gt;36 - 39 kg</td><td>&gt;47 - 51 kg</td><td>&gt;47 - 51 kg</td></tr>
+              <tr><td><strong>Kelas D</strong></td><td>&gt;39 - 42 kg</td><td>&gt;51 - 55 kg</td><td>&gt;51 - 55 kg</td></tr>
+              <tr><td><strong>Kelas E</strong></td><td>&gt;42 - 45 kg</td><td>&gt;55 - 59 kg</td><td>&gt;55 - 59 kg</td></tr>
+              <tr><td><strong>Kelas F</strong></td><td>&gt;45 - 48 kg</td><td>&gt;59 - 63 kg</td><td>&gt;59 - 63 kg</td></tr>
+              <tr><td><strong>Kelas G</strong></td><td>&gt;48 - 51 kg</td><td>&gt;63 - 67 kg</td><td>&gt;63 - 67 kg</td></tr>
+              <tr><td><strong>Kelas H</strong></td><td>&gt;51 - 54 kg</td><td>&gt;67 - 71 kg</td><td>&gt;67 - 71 kg</td></tr>
+              <tr><td><strong>Kelas I</strong></td><td>&gt;54 - 57 kg</td><td>&gt;71 - 75 kg</td><td>&gt;71 - 75 kg</td></tr>
+              <tr><td><strong>Kelas J</strong></td><td>&gt;57 - 60 kg</td><td>&gt;75 - 79 kg</td><td>&gt;75 - 79 kg</td></tr>
+              <tr><td><strong>Kelas K</strong></td><td>&gt;60 - 63 kg</td><td>&gt;79 - 83 kg</td><td>-</td></tr>
+              <tr><td><strong>Kelas L</strong></td><td>&gt;63 - 66 kg</td><td>&gt;83 - 87 kg</td><td>-</td></tr>
+              <tr><td><strong>Kelas M</strong></td><td>&gt;66 - 69 kg</td><td>-</td><td>-</td></tr>
+              <tr><td><strong>Kelas N</strong></td><td>&gt;69 - 72 kg</td><td>-</td><td>-</td></tr>
+              <tr><td><strong>Kelas Bebas</strong></td><td>&gt;72 - 75 kg</td><td>&gt;87 - 99 kg</td><td>&gt;79 - 91 kg</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>📱 Ikuti Informasi Resmi Perguruan & Tim Kami di Instagram:</p>
+    <div class="ig-links">
+      <a href="https://www.instagram.com/ppssmi_satu.tigaraksa?cplk=MmQzbWwxNHljaG0z" target="_blank">📸 Satu Tigaraksa</a>
+      <a href="https://www.instagram.com/pencaksilatsman6?dlrf=OGdkMWd6enI5a21m" target="_blank">📸 Pencak Silat SMAN 6 Kab. Tangerang</a>
+    </div>
+  </footer>
+
+  <!-- MODAL GRAFIK DETAIL -->
+  <div class="modal" id="modalGrafik">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-gold); padding-bottom: 10px;">
+        <div>
+          <h3 id="modalNama" style="color: var(--gold-light);">Nama Atlet</h3>
+          <small id="modalInfo" style="color: var(--text-muted);"></small>
+        </div>
+        <button class="close-btn" onclick="tutupModal()">✕ Tutup</button>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #60a5fa;">📈 Joging Mingguan (Target 3 KM)</h4>
+        <canvas id="chartMingguan" height="140"></canvas>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--gold-light);">🌙 Program Ramadhan (Target 40 KM)</h4>
+        <canvas id="chartRamadhan" height="140"></canvas>
+      </div>
+      <div>
+        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--gold-light);">📸 Bukti & Link Strava</h4>
+        <div id="modalRiwayat" style="font-size: 0.85rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BATAS_KELAS = {
+      "Pra Remaja": {
+        "A": [30, 33], "B": [33.01, 36], "C": [36.01, 39], "D": [39.01, 42],
+        "E": [42.01, 45], "F": [45.01, 48], "G": [48.01, 51], "H": [51.01, 54],
+        "I": [54.01, 57], "J": [57.01, 60], "K": [60.01, 63], "L": [63.01, 66],
+        "M": [66.01, 69], "N": [69.01, 72], "Bebas": [72.01, 75]
+      },
+      "Remaja": {
+        "A": [39, 43], "B": [43.01, 47], "C": [47.01, 51], "D": [51.01, 55],
+        "E": [55.01, 59], "F": [59.01, 63], "G": [63.01, 67], "H": [67.01, 71],
+        "I": [71.01, 75], "J": [75.01, 79], "K": [79.01, 83], "L": [83.01, 87],
+        "Bebas Putra": [87.01, 99], "Bebas Putri": [79.01, 91]
+      }
+    };
+
+    const INITIAL_ATHLETES = [
+      { id: 1, nama: "Yehezkiel Gunawan S.", tim: "Lapis 1", kelas: "F", kategori: "Remaja", gender: "Putra" },
+      { id: 2, nama: "Rizky Heryanto", tim: "Lapis 1", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 3, nama: "Khairul Azzam", tim: "Lapis 1", kelas: "G", kategori: "Remaja", gender: "Putra" },
+      { id: 4, nama: "Rafi Ardiyansah", tim: "Lapis 1", kelas: "B", kategori: "Remaja", gender: "Putra" },
+      { id: 5, nama: "Alfiter Malau", tim: "Lapis 1", kelas: "I", kategori: "Remaja", gender: "Putra" },
+      { id: 6, nama: "Bagas Suryabakri", tim: "Lapis 1", kelas: "E", kategori: "Remaja", gender: "Putra" },
+      { id: 7, nama: "Gabriel Anugrah S.", tim: "Lapis 1", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 8, nama: "Endah Nur Saleh", tim: "Lapis 1", kelas: "D", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 9, nama: "M. Wildan Ardiansya", tim: "Lapis 1", kelas: "H", kategori: "Remaja", gender: "Putra" },
+      { id: 10, nama: "Putri Rahma Azzahra", tim: "Lapis 1", kelas: "C", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 11, nama: "Dwi Ajeng Rahmawati", tim: "Lapis 1", kelas: "B", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 12, nama: "Baradesta Handaru", tim: "Lapis 1", kelas: "J", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 13, nama: "Rendy Hansa Hidayat", tim: "Lapis 1", kelas: "F", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 14, nama: "Raihan Iqbal Apriliando", tim: "Lapis 2", kelas: "A", kategori: "Remaja", gender: "Putra" },
+      { id: 15, nama: "Sahrul Ramdani Yazid", tim: "Lapis 2", kelas: "L", kategori: "Remaja", gender: "Putra" },
+      { id: 16, nama: "Hafidh Ilham Akbar", tim: "Lapis 2", kelas: "C", kategori: "Remaja", gender: "Putra" },
+      { id: 17, nama: "Siti Rohmah", tim: "Lapis 2", kelas: "C", kategori: "Remaja", gender: "Putri" },
+      { id: 18, nama: "Anindya Salsabila", tim: "Lapis 2", kelas: "Tunggal", kategori: "Remaja", gender: "Putri" },
+      { id: 19, nama: "Aditya Desyra Kartika", tim: "Lapis 2", kelas: "I", kategori: "Remaja", gender: "Putri" },
+      { id: 20, nama: "Zaskia Wulandari", tim: "Lapis 2", kelas: "D", kategori: "Remaja", gender: "Putri" },
+      { id: 21, nama: "M. Maulana Ardiansyah", tim: "Lapis 2", kelas: "D", kategori: "Remaja", gender: "Putra" },
+      { id: 22, nama: "Anisa Nur Oktavia", tim: "Lapis 2", kelas: "M", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 23, nama: "Emir Cesar Arda Bili", tim: "Lapis 2", kelas: "F", kategori: "Remaja", gender: "Putra" },
+      { id: 24, nama: "Friska Simanjuntak", tim: "Lapis 2", kelas: "H", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 25, nama: "Olivia Stephanie S.", tim: "Lapis 2", kelas: "I", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 26, nama: "Arina Ramadhani", tim: "Lapis 2", kelas: "Tunggal", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 27, nama: "M. Aldan Prayoga", tim: "Lapis 2", kelas: "C", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 28, nama: "Iqbal Alfa Rizqy", tim: "Lapis 2", kelas: "G", kategori: "Pra Remaja", gender: "Putra" },
+      { id: 29, nama: "Nifa Arthalia", tim: "Lapis 2", kelas: "F", kategori: "Pra Remaja", gender: "Putri" },
+      { id: 30, nama: "Latiefa Shahreza", tim: "Lapis 2", kelas: "B", kategori: "Remaja", gender: "Putri" },
+      { id: 31, nama: "Almahyra Ramadhanty Azfaralda", tim: "Lapis 2", kelas: "D", kategori: "Pra Remaja", gender: "Putri" }
+    ];
+
+    window.appData = {};
+    let screenshotBase64 = "";
+    let chartMingguanInstance = null;
+    let chartRamadhanInstance = null;
+
+    // VARIABEL THREE.JS 3D, ANIMASI OTOT & WASIT
+    let scene, camera, renderer, controls;
+    let fighterRed, fighterBlue;
+    let is3DInitialized = false;
+    let matchInterval = null;
+    let timerInterval = null;
+    let isPaused = false;
+    let skorM = 0, skorB = 0, stamM = 100, stamB = 100;
+    let warnM = 0, warnB = 0;
+    let totalPukul = 0, totalTendang = 0, totalBanting = 0;
+    let sisaDetik = 180, currentBabak = 1;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populateSelects();
+      renderAtletCards();
+      renderTabelBerat();
+      updateFisikPreview();
+    });
+
+    function switchTab(tabName, btnEl) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      btnEl.classList.add('active');
+
+      if (tabName === 'simulasi') {
+        setTimeout(() => {
+          if (!is3DInitialized) {
+            initArena3D();
+          } else {
+            onWindowResize3D();
+          }
+          updateFisikPreview();
+        }, 100);
+      }
+    }
+
+    /* ================= INISIALISASI ENGINE 3D & ANIMASI OTOT ================= */
+    function initArena3D() {
+      const container = document.getElementById('canvas3dContainer');
+      if (!container) return;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x02040a);
+      scene.fog = new THREE.FogExp2(0x02040a, 0.03);
+
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera.position.set(0, 5.0, 9.0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2.05;
+      controls.minDistance = 4;
+      controls.maxDistance = 15;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xfff5cc, 1.2);
+      mainLight.position.set(5, 12, 6);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      scene.add(mainLight);
+
+      const redLight = new THREE.PointLight(0xef4444, 1.5, 10);
+      redLight.position.set(-4, 3, 2);
+      scene.add(redLight);
+
+      const blueLight = new THREE.PointLight(0x3b82f6, 1.5, 10);
+      blueLight.position.set(4, 3, 2);
+      scene.add(blueLight);
+
+      const matrasGeo = new THREE.CylinderGeometry(4.8, 5.0, 0.25, 48);
+      const matrasMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.5, metalness: 0.1 });
+      const matras = new THREE.Mesh(matrasGeo, matrasMat);
+      matras.position.y = -0.125;
+      matras.receiveShadow = true;
+      scene.add(matras);
+
+      const ringGeo = new THREE.RingGeometry(3.8, 4.0, 48);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.01;
+      scene.add(ring);
+
+      const centerGeo = new THREE.RingGeometry(0.8, 0.9, 32);
+      const centerRing = new THREE.Mesh(centerGeo, ringMat);
+      centerRing.rotation.x = -Math.PI / 2;
+      centerRing.position.y = 0.01;
+      scene.add(centerRing);
+
+      const scaleM = hitungSkalaOtot(document.getElementById('selMerah').value);
+      const scaleB = hitungSkalaOtot(document.getElementById('selBiru').value);
+
+      fighterRed = createHumanoidPesilat(0xdc2626, scaleM);
+      fighterRed.group.position.set(-1.5, 0, 0);
+      fighterRed.group.rotation.y = Math.PI / 2;
+      scene.add(fighterRed.group);
+
+      fighterBlue = createHumanoidPesilat(0x2563eb, scaleB);
+      fighterBlue.group.position.set(1.5, 0, 0);
+      fighterBlue.group.rotation.y = -Math.PI / 2;
+      scene.add(fighterBlue.group);
+
+      is3DInitialized = true;
+      window.addEventListener('resize', onWindowResize3D);
+      animate3D();
+    }
+
+    function hitungSkalaOtot(atletId) {
+      const d = window.appData[atletId] || { mingguan: [0,0,0,0], ramadhan: [0,0,0,0] };
+      const totalKm = (d.mingguan || [0,0,0,0]).reduce((a,b)=>a+b, 0) + (d.ramadhan || [0,0,0,0]).reduce((a,b)=>a+b, 0);
+      return Math.min(1.4, 1.0 + (totalKm / 45));
+    }
+
+    function createHumanoidPesilat(cornerColorHex, muscleScale) {
+      const group = new THREE.Group();
+
+      const suitMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.6 });
+      const beltMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+      const protectorMat = new THREE.MeshStandardMaterial({ color: cornerColorHex, roughness: 0.3, metalness: 0.2 });
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xdfb185, roughness: 0.5 });
+
+      const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.25, 0.3), suitMat);
+      pelvis.position.y = 0.75;
+      group.add(pelvis);
+
+      const belt = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.12, 0.34), beltMat);
+      belt.position.y = 0.9;
+      group.add(belt);
+
+      // Torso / Dada dengan referensi skala otot hipertrofi
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.65 * muscleScale, 0.65, 0.36 * muscleScale), suitMat);
+      torso.position.y = 1.3;
+      torso.castShadow = true;
+      group.add(torso);
+
+      const protector = new THREE.Mesh(new THREE.BoxGeometry(0.7 * muscleScale, 0.55, 0.42 * muscleScale), protectorMat);
+      protector.position.y = 1.32;
+      group.add(protector);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
+      head.position.y = 1.95;
+      head.castShadow = true;
+      group.add(head);
+
+      const headband = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.07, 16), new THREE.MeshBasicMaterial({ color: 0xd4af37 }));
+      headband.position.y = 2.0;
+      group.add(headband);
+
+      const armGeo = new THREE.BoxGeometry(0.18 * muscleScale, 0.65, 0.18 * muscleScale);
+
+      const leftArmPivot = new THREE.Group();
+      leftArmPivot.position.set(-0.45 * muscleScale, 1.55, 0);
+      const leftArm = new THREE.Mesh(armGeo, suitMat);
+      leftArm.position.y = -0.28;
+      leftArm.castShadow = true;
+      leftArmPivot.add(leftArm);
+      leftArmPivot.rotation.x = -0.7;
+      leftArmPivot.rotation.z = -0.25;
+      group.add(leftArmPivot);
+
+      const rightArmPivot = new THREE.Group();
+      rightArmPivot.position.set(0.45 * muscleScale, 1.55, 0);
+      const rightArm = new THREE.Mesh(armGeo, suitMat);
+      rightArm.position.y = -0.28;
+      rightArm.castShadow = true;
+      rightArmPivot.add(rightArm);
+      rightArmPivot.rotation.x = -0.7;
+      rightArmPivot.rotation.z = 0.25;
+      group.add(rightArmPivot);
+
+      const legGeo = new THREE.BoxGeometry(0.22 * muscleScale, 0.75, 0.22 * muscleScale);
+
+      const leftLegPivot = new THREE.Group();
+      leftLegPivot.position.set(-0.16, 0.65, 0);
+      const leftLeg = new THREE.Mesh(legGeo, suitMat);
+      leftLeg.position.y = -0.35;
+      leftLeg.castShadow = true;
+      leftLegPivot.add(leftLeg);
+      leftLegPivot.rotation.x = -0.2;
+      group.add(leftLegPivot);
+
+      const rightLegPivot = new THREE.Group();
+      rightLegPivot.position.set(0.16, 0.65, 0);
+      const rightLeg = new THREE.Mesh(legGeo, suitMat);
+      rightLeg.position.y = -0.35;
+      rightLeg.castShadow = true;
+      rightLegPivot.add(rightLeg);
+      rightLegPivot.rotation.x = 0.2;
+      group.add(rightLegPivot);
+
+      return { group, torso, leftArmPivot, rightArmPivot, leftLegPivot, rightLegPivot, baseScale: muscleScale };
+    }
+
+    function updateFisikPreview() {
+      const idM = document.getElementById('selMerah').value;
+      const idB = document.getElementById('selBiru').value;
+      if (!idM || !idB) return;
+
+      const pM = INITIAL_ATHLETES.find(a => a.id == idM);
+      const pB = INITIAL_ATHLETES.find(a => a.id == idB);
+
+      const scaleM = hitungSkalaOtot(idM);
+      const scaleB = hitungSkalaOtot(idB);
+
+      const pctsM = Math.round((scaleM - 1.0) * 300);
+      const pctsB = Math.round((scaleB - 1.0) * 300);
+
+      document.getElementById('titleOtotMerah').innerText = `🔴 ${pM.nama}`;
+      document.getElementById('descOtotMerah').innerHTML = `Indeks Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsM}%</strong><br>Daya Ledak Pukulan & Tendangan: <strong>${Math.round(85 + pctsM * 0.4)}%</strong>`;
+
+      document.getElementById('titleOtotBiru').innerText = `🔵 ${pB.nama}`;
+      document.getElementById('descOtotBiru').innerHTML = `Indeks Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsB}%</strong><br>Daya Ledak Pukulan & Tendangan: <strong>${Math.round(85 + pctsB * 0.4)}%</strong>`;
+
+      if (is3DInitialized) {
+        scene.remove(fighterRed.group);
+        scene.remove(fighterBlue.group);
+
+        fighterRed = createHumanoidPesilat(0xdc2626, scaleM);
+        fighterRed.group.position.set(-1.5, 0, 0);
+        fighterRed.group.rotation.y = Math.PI / 2;
+        scene.add(fighterRed.group);
+
+        fighterBlue = createHumanoidPesilat(0x2563eb, scaleB);
+        fighterBlue.group.position.set(1.5, 0, 0);
+        fighterBlue.group.rotation.y = -Math.PI / 2;
+        scene.add(fighterBlue.group);
+      }
+    }
+
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      const time = Date.now() * 0.005;
+
+      if (fighterRed && fighterBlue && !isPaused) {
+        // Animasi pernapasan & denyut otot (kontraksi hipertrofi ringan saat idle)
+        const pulseM = 1.0 + Math.sin(time * 3) * 0.03;
+        const pulseB = 1.0 + Math.cos(time * 3) * 0.03;
+
+        fighterRed.torso.scale.set(pulseM, 1, pulseM);
+        fighterBlue.torso.scale.set(pulseB, 1, pulseB);
+
+        fighterRed.group.position.y = Math.sin(time) * 0.04;
+        fighterBlue.group.position.y = Math.cos(time) * 0.04;
+      }
+
+      if (controls) controls.update();
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    function onWindowResize3D() {
+      const container = document.getElementById('canvas3dContainer');
+      if (!container || !camera || !renderer) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    /* ================= KONTROL WASIT ================= */
+    function aksiWasit(sudut, jenis) {
+      const logEl = document.getElementById('logCombat');
+      const namaMerah = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
+      const namaBiru = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
+      const namaAktor = sudut === 'merah' ? `🔴 ${namaMerah}` : `🔵 ${namaBiru}`;
+
+      if (jenis === 'binaan') {
+        if (sudut === 'merah') warnM++; else warnB++;
+        logEl.innerHTML += `🚩 <strong>WASIT:</strong> Memerintahkan <strong>Binaan</strong> kepada ${namaAktor}!<br>`;
+      } else if (jenis === 'peringatan') {
+        if (sudut === 'merah') {
+          warnM++;
+          skorM = Math.max(0, skorM - 5);
+          document.getElementById('skorMerah').innerText = skorM;
+        } else {
+          warnB++;
+          skorB = Math.max(0, skorB - 5);
+          document.getElementById('skorBiru').innerText = skorB;
+        }
+        logEl.innerHTML += `🛑 <strong>WASIT:</strong> <strong>Peringatan</strong> diberikan pada ${namaAktor}! (-5 Poin)<br>`;
+      } else if (jenis === 'jatuhan') {
+        tambahPoin(sudut, 3);
+        logEl.innerHTML += `🤼 <strong>DEWAN JURI:</strong> Disahkan teknik <strong>Jatuhan</strong> untuk ${namaAktor}! (+3 Poin)<br>`;
+      } else if (jenis === 'diskalifikasi') {
+        logEl.innerHTML += `❌ <strong>WASIT KEPALA:</strong> ${namaAktor} kena <strong>Diskualifikasi (Disuli)</strong>!<br>`;
+        alert(`Pertandingan dihentikan oleh Wasit. Pesilat ${namaAktor} didiskualifikasi.`);
+        clearInterval(matchInterval);
+        clearInterval(timerInterval);
+      }
+
+      document.getElementById('warnMerah').innerText = warnM;
+      document.getElementById('warnBiru').innerText = warnB;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function togglePauseMatch() {
+      isPaused = !isPaused;
+      const btn = document.getElementById('btnPause');
+      const logEl = document.getElementById('logCombat');
+      if (isPaused) {
+        btn.innerText = "▶️ Lanjutkan / Resume Laga";
+        logEl.innerHTML += `⏸️ <strong>WASIT:</strong> Menghentikan pertandingan sementara (STOP).<br>`;
+      } else {
+        btn.innerText = "⏸️ Hentikan / Pause Laga";
+        logEl.innerHTML += `▶️ <strong>WASIT:</strong> Memerintahkan pertandingan dimulai kembali.<br>`;
+      }
+    }
+
+    function keluarSanksi() {
+      const logEl = document.getElementById('logCombat');
+      logEl.innerHTML += `📢 <strong>WASIT KEPALA:</strong> Memberi aba-aba keras <strong>'BERHENTI'</strong>! Seluruh atlet kembali ke posisi semula.<br>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    /* ================= EKSEKUSI JURUS & ANIMASI OTOT DINAMIS ================= */
+    function eksekusiJurus3D(sudut, jenisJurus) {
+      if (!is3DInitialized) initArena3D();
+      if (isPaused) return;
+
+      const penyerang = sudut === 'merah' ? fighterRed : fighterBlue;
+      const lawan = sudut === 'merah' ? fighterBlue : fighterRed;
+      const arah = sudut === 'merah' ? 1 : -1;
+      const logEl = document.getElementById('logCombat');
+
+      const namaMerah = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
+      const namaBiru = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
+      const namaAktor = sudut === 'merah' ? `🔴 ${namaMerah}` : `🔵 ${namaBiru}`;
+
+      penyerang.group.position.x = -0.6 * arah;
+      // Efek kontraksi otot membesar saat menyerang
+      penyerang.torso.scale.set(1.25, 1.1, 1.25);
+
+      if (jenisJurus === 'pukul') {
+        totalPukul++;
+        document.getElementById('statPukul').innerText = totalPukul;
+        penyerang.rightArmPivot.rotation.x = -Math.PI / 1.8;
+        lawan.group.position.x = 1.8 * arah;
+        tambahPoin(sudut, 1);
+        logEl.innerHTML += `${namaAktor} melancarkan <strong>Pukulan Lurus</strong> (Kontraksi Otot Puncak)! (+1 Poin)<br>`;
+      } else if (jenisJurus === 'tendang') {
+        totalTendang++;
+        document.getElementById('statTendang').innerText = totalTendang;
+        penyerang.rightLegPivot.rotation.x = -Math.PI / 1.9;
+        penyerang.group.rotation.z = 0.25 * arah;
+        lawan.group.position.x = 2.0 * arah;
+        tambahPoin(sudut, 2);
+        logEl.innerHTML += `${namaAktor} melepaskan <strong>Tendangan Sabit</strong> (Power Kuadrisep Maksimal)! (+2 Poin)<br>`;
+      } else if (jenisJurus === 'banting') {
+        totalBanting++;
+        document.getElementById('statBanting').innerText = totalBanting;
+        penyerang.group.position.y = 0.2;
+        lawan.group.rotation.z = -Math.PI / 2.2 * arah;
+        lawan.group.position.y = 0.25;
+        tambahPoin(sudut, 3);
+        logEl.innerHTML += `${namaAktor} sukses melakukan <strong>Teknik Bantingan</strong>! (+3 Poin)<br>`;
+      } else if (jenisJurus === 'tangkis') {
+        penyerang.leftArmPivot.rotation.x = -1.3;
+        penyerang.rightArmPivot.rotation.x = -1.3;
+        penyerang.group.position.x = -1.5 * arah;
+        logEl.innerHTML += `${namaAktor} memasang <strong>Tangkisan Kokoh</strong>!<br>`;
+      }
+
+      logEl.scrollTop = logEl.scrollHeight;
+
+      setTimeout(() => {
+        penyerang.group.position.set(-1.5 * arah, 0, 0);
+        penyerang.group.rotation.z = 0;
+        penyerang.rightArmPivot.rotation.x = -0.7;
+        penyerang.leftArmPivot.rotation.x = -0.7;
+        penyerang.rightLegPivot.rotation.x = 0.2;
+        penyerang.torso.scale.set(1, 1, 1);
+
+        lawan.group.position.set(1.5 * arah, 0, 0);
+        lawan.group.rotation.z = 0;
+      }, 550);
+    }
+
+    function tambahPoin(sudut, poin) {
+      if (sudut === 'merah') {
+        skorM += poin;
+        stamB = Math.max(0, stamB - poin * 4);
+      } else {
+        skorB += poin;
+        stamM = Math.max(0, stamM - poin * 4);
+      }
+      document.getElementById('skorMerah').innerText = skorM;
+      document.getElementById('skorBiru').innerText = skorB;
+      document.getElementById('stamMerah').innerText = stamM;
+      document.getElementById('stamBiru').innerText = stamB;
+    }
+
+    function mulaiSimulasi3D() {
+      if (!is3DInitialized) initArena3D();
+      if (matchInterval) clearInterval(matchInterval);
+      if (timerInterval) clearInterval(timerInterval);
+
+      skorM = 0; skorB = 0; stamM = 100; stamB = 100;
+      warnM = 0; warnB = 0; isPaused = false;
+      totalPukul = 0; totalTendang = 0; totalBanting = 0;
+      sisaDetik = 180; currentBabak = 1;
+
+      document.getElementById('warnMerah').innerText = '0';
+      document.getElementById('warnBiru').innerText = '0';
+      document.getElementById('statPukul').innerText = '0';
+      document.getElementById('statTendang').innerText = '0';
+      document.getElementById('statBanting').innerText = '0';
+      document.getElementById('btnPause').innerText = "⏸️ Hentikan / Pause Laga";
+
+      const idMerah = parseInt(document.getElementById('selMerah').value);
+      const idBiru = parseInt(document.getElementById('selBiru').value);
+      if (idMerah === idBiru) { alert("Pilih dua pesilat berbeda!"); return; }
+
+      const pM = INITIAL_ATHLETES.find(a => a.id === idMerah);
+      const pB = INITIAL_ATHLETES.find(a => a.id === idBiru);
+
+      const logEl = document.getElementById('logCombat');
+      logEl.innerHTML = `<strong>[Pertandingan Resmi Dimulai]</strong> Wasit meniup peluit! Babak 1 • ${pM.nama} vs ${pB.nama}!<br>`;
+
+      timerInterval = setInterval(() => {
+        if (isPaused) return;
+        sisaDetik--;
+        let m = Math.floor(sisaDetik / 60);
+        let s = sisaDetik % 60;
+        document.getElementById('timerRonde').innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+
+        if (sisaDetik <= 0) {
+          if (currentBabak < 3) {
+            currentBabak++;
+            sisaDetik = 180;
+            document.getElementById('infoBabak').innerText = `BABAK ${currentBabak}`;
+            logEl.innerHTML += `<strong>[Istirahat Ronde] Wasit mengumumkan Istirahat Babak ${currentBabak}</strong><br>`;
+          } else {
+            clearInterval(timerInterval);
+            clearInterval(matchInterval);
+            const pemenang = skorM > skorB ? `${pM.nama} (Merah)` : (skorB > skorM ? `${pB.nama} (Biru)` : "Seri");
+            document.getElementById('infoBabak').innerText = `🏆 SELESAI`;
+            logEl.innerHTML += `<hr><strong>🏆 Waktu Habis! Pemenang: ${pemenang}</strong><br>`;
+          }
+        }
+      }, 1000);
+
+      matchInterval = setInterval(() => {
+        if (isPaused || stamM <= 0 || stamB <= 0) return;
+        const giliranMerah = Math.random() >= 0.5;
+        if (giliranMerah) {
+          eksekusiJurus3D('merah', Math.random() > 0.5 ? 'pukul' : 'tendang');
+        } else {
+          eksekusiJurus3D('biru', Math.random() > 0.5 ? 'pukul' : 'tendang');
+        }
+      }, 2000);
+    }
+
+    function resetSimulasi3D() {
+      if (matchInterval) clearInterval(matchInterval);
+      if (timerInterval) clearInterval(timerInterval);
+      skorM = 0; skorB = 0; stamM = 100; stamB = 100; warnM = 0; warnB = 0; sisaDetik = 180; currentBabak = 1; isPaused = false;
+      document.getElementById('skorMerah').innerText = '0';
+      document.getElementById('skorBiru').innerText = '0';
+      document.getElementById('warnMerah').innerText = '0';
+      document.getElementById('warnBiru').innerText = '0';
+      document.getElementById('timerRonde').innerText = '03:00';
+      document.getElementById('infoBabak').innerText = 'BABAK 1';
+      document.getElementById('statPukul').innerText = '0';
+      document.getElementById('statTendang').innerText = '0';
+      document.getElementById('statBanting').innerText = '0';
+      document.getElementById('btnPause').innerText = "⏸️ Hentikan / Pause Laga";
+      document.getElementById('logCombat').innerHTML = '[Arena 3D Direset] Wasit siap memulai laga baru!';
+    }
+
+    /* ================= FUNGSI MONITORING ATLET ================= */
+    function populateSelects() {
+      const selLari = document.getElementById('selectAtletLari');
+      const selBerat = document.getElementById('selectAtletBerat');
+      const selMerah = document.getElementById('selMerah');
+      const selBiru = document.getElementById('selBiru');
+      if (!selLari || !selMerah) return;
+      
+      selLari.innerHTML = ''; selBerat.innerHTML = ''; selMerah.innerHTML = ''; selBiru.innerHTML = '';
+
+      INITIAL_ATHLETES.forEach(a => {
+        const label = `${a.nama} (${a.tim} - Kelas ${a.kelas})`;
+        selLari.add(new Option(label, a.id));
+        selBerat.add(new Option(label, a.id));
+        selMerah.add(new Option(label, a.id));
+        selBiru.add(new Option(label, a.id));
+      });
+      if (INITIAL_ATHLETES.length > 1) selBiru.selectedIndex = 1;
+    }
+
+    function prosesGambar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 450;
+          const scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          screenshotBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          document.getElementById('previewScreenshot').src = screenshotBase64;
+          document.getElementById('previewScreenshot').style.display = 'block';
+          document.getElementById('labelUpload').innerText = "📸 Screenshot Siap";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function getRangeText(atlet) {
+      if (atlet.kelas === "Tunggal") return "Seni (Bebas)";
+      const range = BATAS_KELAS[atlet.kategori]?.[atlet.kelas];
+      if (!range) return "-";
+      return `${range[0] % 1 !== 0 ? '>' + Math.floor(range[0]) : range[0]} – ${range[1]} kg`;
+    }
+
+    function renderAtletCards() {
+      const grid = document.getElementById('athleteGrid');
+      const search = document.getElementById('searchAtlet').value.toLowerCase();
+      const timFilter = document.getElementById('filterTim').value;
+      grid.innerHTML = '';
+
+      INITIAL_ATHLETES.forEach((a) => {
+        if (timFilter !== 'ALL' && a.tim !== timFilter) return;
+        if (!a.nama.toLowerCase().includes(search)) return;
+
+        const d = window.appData[a.id] || { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+        const totalMingguan = (d.mingguan || [0,0,0,0]).reduce((acc, v) => acc + v, 0);
+        const totalRamadhan = (d.ramadhan || [0,0,0,0]).reduce((acc, v) => acc + v, 0);
+
+        const card = document.createElement('div');
+        card.className = 'athlete-card';
+        card.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span class="badge ${a.tim === 'Lapis 1' ? 'badge-lapis1' : 'badge-lapis2'}">${a.tim}</span>
+              <span style="font-size: 0.78rem; font-weight: 600; color: var(--gold-light);">Kelas ${a.kelas} ${a.kategori}</span>
+            </div>
+            <h3 style="font-size: 1.05rem; margin-bottom: 4px; color: white;">${a.nama}</h3>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+              BB: <strong style="color: var(--gold-light);">${d.berat ? d.berat + ' kg' : 'Belum'}</strong> (Target: ${getRangeText(a)})
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Mingguan (3km/mgg)</span><span>${totalMingguan.toFixed(1)} / 12 KM</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width: ${Math.min(100, (totalMingguan/12)*100)}%"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span>Ramadhan (07 Feb - 07 Mar)</span><span>${totalRamadhan.toFixed(1)} / 40 KM</span></div>
+              <div class="progress-bar"><div class="progress-fill ramadhan" style="width: ${Math.min(100, (totalRamadhan/40)*100)}%"></div></div>
+            </div>
+          </div>
+          <button class="btn btn-outline" onclick="bukaModalGrafik(${a.id})">📊 Grafik & Bukti Strava (${(d.riwayat || []).length})</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function simpanLari() {
+      const id = parseInt(document.getElementById('selectAtletLari').value);
+      const program = document.getElementById('jenisProgram').value;
+      const minggu = parseInt(document.getElementById('mingguKe').value) - 1;
+      const km = parseFloat(document.getElementById('inputKm').value);
+      const link = document.getElementById('inputStrava').value.trim();
+
+      if (isNaN(km) || km <= 0) { alert("Masukkan jarak KM yang valid!"); return; }
+
+      if (!window.appData[id]) {
+        window.appData[id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      }
+      if (!window.appData[id].riwayat) window.appData[id].riwayat = [];
+
+      window.appData[id][program][minggu] += km;
+      window.appData[id].riwayat.unshift({
+        tanggal: new Date().toLocaleDateString('id-ID'),
+        program: program === 'mingguan' ? 'Mingguan' : 'Ramadhan',
+        minggu: minggu + 1, km, link: link || '#', gambar: screenshotBase64
+      });
+
+      window.simpanKeCloud(window.appData);
+      document.getElementById('inputKm').value = '';
+      document.getElementById('inputStrava').value = '';
+      document.getElementById('inputFileScreenshot').value = '';
+      document.getElementById('previewScreenshot').style.display = 'none';
+      document.getElementById('labelUpload').innerText = "📸 Pilih Foto Screenshot";
+      screenshotBase64 = "";
+      alert("Setoran berhasil disimpan secara real-time!");
+    }
+
+    function simpanBerat() {
+      const id = parseInt(document.getElementById('selectAtletBerat').value);
+      const berat = parseFloat(document.getElementById('inputBerat').value);
+      if (isNaN(berat) || berat < 20 || berat > 150) { alert("Masukkan berat badan valid!"); return; }
+
+      if (!window.appData[id]) {
+        window.appData[id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+      }
+      window.appData[id].berat = berat;
+
+      window.simpanKeCloud(window.appData);
+      document.getElementById('inputBerat').value = '';
+      alert("Berat badan berhasil diperbarui!");
+    }
+
+    function hapusRiwayat(atletId, index) {
+      if (!confirm("Yakin ingin menghapus riwayat setoran lari ini?")) return;
+      const riwayatItem = window.appData[atletId].riwayat[index];
+      if (riwayatItem) {
+        const progKey = riwayatItem.program === 'Mingguan' ? 'mingguan' : 'ramadhan';
+        const mggIdx = riwayatItem.minggu - 1;
+        window.appData[atletId][progKey][mggIdx] = Math.max(0, window.appData[atletId][progKey][mggIdx] - riwayatItem.km);
+        window.appData[atletId].riwayat.splice(index, 1);
+        window.simpanKeCloud(window.appData);
+        bukaModalGrafik(atletId);
+        renderAtletCards();
+        alert("Riwayat berhasil dihapus!");
+      }
+    }
+
+    function renderTabelBerat() {
+      const tbody = document.getElementById('tbodyBerat');
+      const filter = document.getElementById('filterTimBerat').value;
+      tbody.innerHTML = '';
+      let no = 1;
+
+      INITIAL_ATHLETES.forEach(a => {
+        if (filter !== 'ALL' && a.tim !== filter) return;
+        const d = window.appData[a.id] || { berat: null };
+        const berat = d.berat;
+        let status = `<span class="badge" style="background:rgba(255,255,255,0.08); color:#94a3b8;">Belum</span>`;
+
+        if (berat !== null) {
+          if (a.kelas === "Tunggal") {
+            status = `<span class="badge badge-ok">Seni</span>`;
+          } else {
+            const [min, max] = BATAS_KELAS[a.kategori][a.kelas];
+            if (berat >= min && berat <= max) status = `<span class="badge badge-ok">Ideal</span>`;
+            else if (berat < min) status = `<span class="badge badge-warn">Kurang ${(min-berat).toFixed(1)}kg</span>`;
+            else status = `<span class="badge badge-over">Over ${(berat-max).toFixed(1)}kg</span>`;
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${no++}</td><td><strong>${a.nama}</strong></td>
+          <td><span class="badge ${a.tim === 'Lapis 1' ? 'badge-lapis1' : 'badge-lapis2'}">${a.tim}</span></td>
+          <td>Kelas ${a.kelas} (${a.kategori})</td><td>${getRangeText(a)}</td>
+          <td><strong style="color:var(--gold-light);">${berat !== null ? berat + ' kg' : '-'}</strong></td><td>${status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function bukaModalGrafik(id) {
+      const atlet = INITIAL_ATHLETES.find(a => a.id === id);
+      const d = window.appData[id] || { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
+
+      document.getElementById('modalNama').innerText = atlet.nama;
+      document.getElementById('modalInfo').innerText = `${atlet.tim} • Kelas ${atlet.kelas} ${atlet.kategori} • BB: ${d.berat ? d.berat + ' kg' : '-'}`;
+
+      const riwayatEl = document.getElementById('modalRiwayat');
+      const listRiwayat = d.riwayat || [];
+      riwayatEl.innerHTML = listRiwayat.length === 0 ? '<p style="color:#94a3b8;">Belum ada riwayat.</p>' : listRiwayat.map((r, idx) => `
+        <div class="riwayat-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div><strong style="color:var(--gold-light);">${r.program} (Mgg ${r.minggu})</strong> • <span style="color:#60a5fa; font-weight:bold;">${r.km} KM</span><br><small style="color:#94a3b8;">${r.tanggal}</small></div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              ${r.link !== '#' ? `<a href="${r.link}" target="_blank" style="color:#fc4c02; font-weight:bold; text-decoration:none;">Strava ↗</a>` : ''}
+              <button onclick="hapusRiwayat(${id}, ${idx})" style="background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid #ef4444; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:bold; cursor:pointer;">Hapus</button>
+            </div>
+          </div>
+          ${r.gambar ? `<img src="${r.gambar}" class="riwayat-img" onclick="window.open('${r.gambar}', '_blank')">` : ''}
+        </div>
+      `).join('');
+
+      document.getElementById('modalGrafik').classList.add('open');
+      if (chartMingguanInstance) chartMingguanInstance.destroy();
+      if (chartRamadhanInstance) chartRamadhanInstance.destroy();
+
+      Chart.defaults.color = '#cbd5e1';
+      Chart.defaults.borderColor = 'rgba(212, 175, 55, 0.15)';
+
+      chartMingguanInstance = new Chart(document.getElementById('chartMingguan').getContext('2d'), {
+        type: 'bar',
+        data: { labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'], datasets: [{ label: 'KM', data: d.mingguan || [0,0,0,0], backgroundColor: '#3b82f6' }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      let kum = 0; const kumArr = []; 
+      (d.ramadhan || [0,0,0,0]).forEach(v => { kum += v; kumArr.push(kum); });
+      chartRamadhanInstance = new Chart(document.getElementById('chartRamadhan').getContext('2d'), {
+        type: 'line',
+        data: { labels: ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4'], datasets: [{ label: 'Akumulasi', data: kumArr, borderColor: '#d4af37', fill: true, backgroundColor: 'rgba(212, 175, 55, 0.2)' }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true, max: 45 } } }
+      });
+    }
+
+    function tutupModal() { document.getElementById('modalGrafik').classList.remove('open'); }
+  </script>
+</body>
+</html>
