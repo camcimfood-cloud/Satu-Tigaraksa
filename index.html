@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arena 3D Wasit, Animasi Otot & Monitoring Silat - Satu Tigaraksa</title>
+  <title>Arena 3D Wasit, Otot, Perlengkapan, Kesehatan & Monitoring Silat</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Three.js untuk Render 3D & Animasi Otot -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -84,30 +84,19 @@
     }
 
     .bg-ornament {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background-image: 
         linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
     }
 
     header {
-      position: relative;
-      z-index: 10;
+      position: relative; z-index: 10;
       background: linear-gradient(135deg, #091128 0%, #1e3a8a 100%);
-      border-bottom: 2px solid var(--gold);
-      color: white;
-      padding: 20px 16px;
-      text-align: center;
+      border-bottom: 2px solid var(--gold); color: white; padding: 20px 16px; text-align: center;
       box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
     }
 
     .header-logo {
@@ -115,16 +104,16 @@
       border: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold-glow); background: white;
     }
 
-    header h1 { font-size: 1.35rem; color: var(--gold-light); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-    header p { font-size: 0.85rem; color: #cbd5e1; }
+    header h1 { font-size: 1.3rem; color: var(--gold-light); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    header p { font-size: 0.82rem; color: #cbd5e1; }
 
     .nav-tabs {
       display: flex; background: rgba(9, 17, 40, 0.95); border-bottom: 1px solid var(--border-gold);
       position: sticky; top: 0; z-index: 99; overflow-x: auto; backdrop-filter: blur(8px);
     }
     .tab-btn {
-      flex: 1; padding: 14px 12px; border: none; background: none; font-weight: 700;
-      font-size: 0.82rem; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent;
+      flex: 1; padding: 14px 10px; border: none; background: none; font-weight: 700;
+      font-size: 0.78rem; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent;
       white-space: nowrap; transition: all 0.3s ease;
     }
     .tab-btn:hover { color: var(--gold-light); }
@@ -145,9 +134,9 @@
       margin-bottom: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45); border: 1px solid var(--border-gold); backdrop-filter: blur(10px);
     }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 10px; }
-    .card-title { font-size: 1.08rem; font-weight: 700; color: var(--gold-light); }
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--gold-light); }
 
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
     input[type="text"], input[type="number"], input[type="url"], select {
       padding: 10px 14px; border: 1px solid var(--border-gold); border-radius: 8px; font-size: 0.9rem;
       background: rgba(6, 10, 23, 0.9); color: white; width: 100%; outline: none;
@@ -184,181 +173,82 @@
     .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-blue { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: 1px solid var(--gold); }
     .btn-outline { background: rgba(212, 175, 55, 0.08); border: 1px solid var(--gold); color: var(--gold-light); margin-top: 10px; }
+    .btn-excel { background: linear-gradient(135deg, #047857, #10b981); color: white; border: 1px solid #34d399; width: auto; padding: 10px 16px; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-excel:hover { filter: brightness(1.1); }
 
     /* STYLING ARENA 3D ANIMASI OTOT & WASIT */
     .canvas-3d-wrapper {
-      width: 100%;
-      height: 440px;
-      border-radius: 14px;
-      border: 2px solid var(--gold);
-      overflow: hidden;
-      position: relative;
-      background: #02040a;
+      width: 100%; height: 420px; border-radius: 14px; border: 2px solid var(--gold);
+      overflow: hidden; position: relative; background: #02040a;
       box-shadow: 0 0 35px rgba(212, 175, 55, 0.35);
     }
-    #canvas3dContainer {
-      width: 100%;
-      height: 100%;
-      display: block;
-      cursor: grab;
-    }
+    #canvas3dContainer { width: 100%; height: 100%; display: block; cursor: grab; }
     #canvas3dContainer:active { cursor: grabbing; }
 
     .hud-overlay-top {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-      z-index: 10;
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      display: flex; justify-content: space-between; pointer-events: none; z-index: 10;
     }
     .hud-card {
-      background: rgba(6, 10, 23, 0.88);
-      border: 1px solid var(--gold);
-      padding: 8px 14px;
-      border-radius: 10px;
-      backdrop-filter: blur(4px);
+      background: rgba(6, 10, 23, 0.88); border: 1px solid var(--gold);
+      padding: 8px 14px; border-radius: 10px; backdrop-filter: blur(4px);
     }
     .hud-bottom-hint {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(6, 10, 23, 0.85);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      color: var(--gold-light);
-      pointer-events: none;
-      white-space: nowrap;
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      background: rgba(6, 10, 23, 0.85); border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; color: var(--gold-light);
+      pointer-events: none; white-space: nowrap;
     }
 
     .referee-box {
       background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(30, 58, 138, 0.2));
-      border: 2px solid var(--gold);
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 14px;
+      border: 2px solid var(--gold); border-radius: 12px; padding: 14px; margin-top: 14px;
     }
-    .referee-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .ref-column {
-      background: rgba(6, 10, 23, 0.75);
-      border-radius: 10px;
-      padding: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .ref-btns {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-top: 8px;
-    }
+    .referee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .ref-column { background: rgba(6, 10, 23, 0.75); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+    .ref-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
 
     .muscle-panel {
-      background: rgba(15, 28, 63, 0.75);
-      border: 1px solid var(--border-gold);
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 14px;
+      background: rgba(15, 28, 63, 0.75); border: 1px solid var(--border-gold);
+      border-radius: 12px; padding: 14px; margin-top: 14px;
     }
-    .muscle-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 10px;
-    }
+    .muscle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
     .muscle-stat-card {
-      background: rgba(6, 10, 23, 0.8);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      border-radius: 10px;
-      padding: 12px;
+      background: rgba(6, 10, 23, 0.8); border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 10px; padding: 12px;
     }
 
-    .food-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 10px; }
-    .food-item { background: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--gold); padding: 12px; border-radius: 6px; }
-    .food-item h4 { color: var(--gold-light); margin-bottom: 4px; font-size: 0.95rem; }
-    .food-item p { font-size: 0.82rem; color: var(--text-muted); }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 12px; }
+    .info-card { background: rgba(255, 255, 255, 0.04); border-left: 4px solid var(--gold); padding: 14px; border-radius: 8px; }
+    .info-card h4 { color: var(--gold-light); font-size: 0.98rem; margin-bottom: 6px; }
+    .info-card p, .info-card li { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .info-card ul { padding-left: 16px; margin-top: 6px; }
 
-    .manual-controls-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .ctrl-panel {
-      background: rgba(6, 10, 23, 0.7);
-      border: 1px solid var(--border-gold);
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .action-btns {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      margin-top: 8px;
-    }
+    .manual-controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .ctrl-panel { background: rgba(6, 10, 23, 0.7); border: 1px solid var(--border-gold); border-radius: 10px; padding: 10px; }
+    .action-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
     .btn-skill {
-      padding: 7px 6px;
-      font-size: 0.75rem;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
+      padding: 7px 6px; font-size: 0.75rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-weight: 600; cursor: pointer; transition: 0.2s;
     }
     .btn-skill-red { background: rgba(220, 38, 38, 0.35); border-color: #ef4444; }
     .btn-skill-red:hover { background: #dc2626; }
     .btn-skill-blue { background: rgba(37, 99, 235, 0.35); border-color: #3b82f6; }
     .btn-skill-blue:hover { background: #2563eb; }
     .btn-ref {
-      padding: 7px 6px;
-      font-size: 0.73rem;
-      border-radius: 6px;
-      border: 1px solid var(--gold);
-      background: rgba(212, 175, 55, 0.2);
-      color: var(--gold-light);
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
+      padding: 7px 6px; font-size: 0.73rem; border-radius: 6px; border: 1px solid var(--gold);
+      background: rgba(212, 175, 55, 0.2); color: var(--gold-light); font-weight: 600; cursor: pointer; transition: 0.2s;
     }
     .btn-ref:hover { background: var(--gold); color: #060a17; }
 
-    .stats-panel {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .stat-box {
-      background: rgba(15, 28, 63, 0.7);
-      border: 1px solid var(--border-gold);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-    }
+    .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .stat-box { background: rgba(15, 28, 63, 0.7); border: 1px solid var(--border-gold); border-radius: 8px; padding: 10px; text-align: center; }
     .stat-num { font-size: 1.2rem; font-weight: bold; color: var(--gold-light); }
 
     .log-combat {
-      background: rgba(3, 6, 15, 0.92);
-      border: 1px solid var(--border-gold);
-      border-radius: 8px;
-      padding: 12px;
-      height: 110px;
-      overflow-y: auto;
-      font-size: 0.82rem;
-      text-align: left;
-      color: #cbd5e1;
-      font-family: monospace;
-      margin-top: 14px;
+      background: rgba(3, 6, 15, 0.92); border: 1px solid var(--border-gold); border-radius: 8px;
+      padding: 12px; height: 110px; overflow-y: auto; font-size: 0.82rem; text-align: left;
+      color: #cbd5e1; font-family: monospace; margin-top: 14px;
     }
 
     .table-responsive { overflow-x: auto; }
@@ -389,17 +279,19 @@
   <header>
     <img src="logo.jpg" alt="Logo Satu Tigaraksa" class="header-logo" onerror="this.style.display='none'">
     <div>
-      <h1>🥋 ARENA 3D WASIT, ANIMASI OTOT & MONITORING SILAT</h1>
-      <p>Satu Tigaraksa • Simulasi Animasi Otot 3D, Wasit & Nutrisi Terpadu</p>
+      <h1>🥋 ARENA 3D WASIT, OTOT, PERLENGKAPAN & KESEHATAN</h1>
+      <p>Satu Tigaraksa • Platform Terpadu Simulasi Laga, Hipertrofi Otot & Kesehatan Atlet</p>
     </div>
   </header>
 
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 Grafik & Atlet</button>
-    <button class="tab-btn" onclick="switchTab('simulasi', this)">🎮 Arena 3D, Animasi Otot & Wasit</button>
+    <button class="tab-btn" onclick="switchTab('simulasi', this)">🎮 Arena 3D & Wasit</button>
+    <button class="tab-btn" onclick="switchTab('perlengkapan', this)">🥋 Pakaian, Alat & Kesehatan</button>
     <button class="tab-btn" onclick="switchTab('setoran', this)">🏃 Input Setoran</button>
-    <button class="tab-btn" onclick="switchTab('berat', this)">⚖️ List Berat Badan</button>
-    <button class="tab-btn" onclick="switchTab('aturan', this)">📋 Standar Kelas</button>
+    <button class="tab-btn" onclick="switchTab('berat', this)">⚖️ Berat Badan</button>
+    <button class="tab-btn" onclick="switchTab('kuis', this)">🧠 Kuis Silat</button>
+  <button class="tab-btn" onclick="switchTab('aturan', this)">🚨 Pelanggaran & Aturan</button>
   </nav>
 
   <div class="container">
@@ -421,6 +313,7 @@
           <option value="Lapis 1">Tim Lapis 1 (13 Atlet)</option>
           <option value="Lapis 2">Tim Lapis 2 (18 Atlet)</option>
         </select>
+        <button class="btn btn-excel" onclick="eksporRekapExcel()">📥 Ekspor Rekap (CSV/Excel)</button>
       </div>
 
       <div class="athlete-grid" id="athleteGrid"></div>
@@ -468,43 +361,20 @@
           </div>
 
           <div id="canvas3dContainer"></div>
-          <div class="hud-bottom-hint">🖱️ Klik & Geser untuk putar kamera 360° • Otot berdenyut & membesar saat eksekusi jurus</div>
+          <div class="hud-bottom-hint">🖱️ Klik & Geser putar 360° • Otot berdenyut & membesar saat eksekusi jurus</div>
         </div>
 
-        <!-- PANEL ANALISIS PERKEMBANGAN OTOT & HIPERTROFI -->
+        <!-- PANEL ANALISIS OTOT -->
         <div class="muscle-panel">
           <div style="font-size:0.88rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 8px;">💪 ANALISIS ANIMASI & PERKEMBANGAN OTOT 3D 📈</div>
           <div class="muscle-grid">
             <div class="muscle-stat-card" style="border-color:#ef4444;">
               <div style="font-size:0.78rem; color:#f87171; font-weight:bold; margin-bottom:4px;" id="titleOtotMerah">Statistik Otot Merah</div>
-              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotMerah">Pilih pesilat merah untuk melihat data otot.</div>
+              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotMerah">Pilih pesilat merah.</div>
             </div>
             <div class="muscle-stat-card" style="border-color:#3b82f6;">
               <div style="font-size:0.78rem; color:#60a5fa; font-weight:bold; margin-bottom:4px;" id="titleOtotBiru">Statistik Otot Biru</div>
-              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotBiru">Pilih pesilat biru untuk melihat data otot.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- PANEL KELOMPOK MAKANAN UNTUK OTOT -->
-        <div class="muscle-panel" style="margin-top: 14px;">
-          <div style="font-size:0.88rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 8px;">🍽️ KELOMPOK MAKANAN NUTRISI PEMULIHAN OTOT PESILAT</div>
-          <div class="food-grid">
-            <div class="food-item">
-              <h4>1. Sumber Protein Tinggi</h4>
-              <p>Dada ayam rebus, daging sapi tanpa lemak, ikan tuna, telur utuh, tempe, dan tahu putih.</p>
-            </div>
-            <div class="food-item">
-              <h4>2. Karbohidrat Kompleks</h4>
-              <p>Nasi merah, oatmeal, ubi jalar, dan kentang rebus untuk suplai glikogen otot secara maksimal.</p>
-            </div>
-            <div class="food-item">
-              <h4>3. Lemak Sehat</h4>
-              <p>Alpukat, minyak zaitun, dan kacang almond untuk kestabilan hormon dan tenaga.</p>
-            </div>
-            <div class="food-item">
-              <h4>4. Vitamin & Mineral</h4>
-              <p>Pisang (cegah kram betis), bayam & brokoli (zat besi & magnesium otot).</p>
+              <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;" id="descOtotBiru">Pilih pesilat biru.</div>
             </div>
           </div>
         </div>
@@ -514,74 +384,207 @@
           <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); text-align:center; margin-bottom: 6px;">🚩 PANEL KONTROL WASIT / DEWAN JURI 🚩</div>
           <div class="referee-grid">
             <div class="ref-column" style="border-color:rgba(239,68,68,0.4);">
-              <div style="font-size:0.75rem; color:#f87171; font-weight:bold;">Tindakan Wasit (Sudut Merah):</div>
+              <div style="font-size:0.75rem; color:#f87171; font-weight:bold;">Tindakan Wasit (Merah):</div>
               <div class="ref-btns">
                 <button class="btn-ref" onclick="aksiWasit('merah', 'binaan')">⚠️ Binaan (1)</button>
                 <button class="btn-ref" onclick="aksiWasit('merah', 'peringatan')">🛑 Peringatan (-5)</button>
                 <button class="btn-ref" onclick="aksiWasit('merah', 'jatuhan')">🤼 Jatuhan (+3)</button>
-                <button class="btn-ref" onclick="aksiWasit('merah', 'diskalifikasi')" style="background:rgba(239,68,68,0.3); color:#fca5a5;">❌ Diskualifikasi</button>
+                <button class="btn-ref" onclick="aksiWasit('merah', 'diskalifikasi')" style="background:rgba(239,68,68,0.3); color:#fca5a5;">❌ Disuli</button>
               </div>
             </div>
             <div class="ref-column" style="border-color:rgba(59,130,246,0.4);">
-              <div style="font-size:0.75rem; color:#60a5fa; font-weight:bold;">Tindakan Wasit (Sudut Biru):</div>
+              <div style="font-size:0.75rem; color:#60a5fa; font-weight:bold;">Tindakan Wasit (Biru):</div>
               <div class="ref-btns">
                 <button class="btn-ref" onclick="aksiWasit('biru', 'binaan')">⚠️ Binaan (1)</button>
                 <button class="btn-ref" onclick="aksiWasit('biru', 'peringatan')">🛑 Peringatan (-5)</button>
                 <button class="btn-ref" onclick="aksiWasit('biru', 'jatuhan')">🤼 Jatuhan (+3)</button>
-                <button class="btn-ref" onclick="aksiWasit('biru', 'diskalifikasi')" style="background:rgba(59,130,246,0.3); color:#93c5fd;">❌ Diskualifikasi</button>
+                <button class="btn-ref" onclick="aksiWasit('biru', 'diskalifikasi')" style="background:rgba(59,130,246,0.3); color:#93c5fd;">❌ Disuli</button>
               </div>
             </div>
           </div>
           <div style="display:flex; gap:8px; margin-top:10px;">
-            <button class="btn btn-primary" onclick="togglePauseMatch()" id="btnPause" style="flex:1; padding:8px;">⏸️ Hentikan / Pause Laga</button>
-            <button class="btn btn-blue" onclick="keluarSanksi()" style="flex:1; background:#334155; padding:8px;">📢 Beri Perintah 'BERHENTI'</button>
+            <button class="btn btn-primary" onclick="togglePauseMatch()" id="btnPause" style="flex:1; padding:8px;">⏸️ Pause Laga</button>
+            <button class="btn btn-blue" onclick="keluarSanksi()" style="flex:1; background:#334155; padding:8px;">📢 Perintah 'BERHENTI'</button>
           </div>
         </div>
 
         <!-- STATISTIK & KONTROL MANUAL -->
         <div class="stats-panel">
-          <div class="stat-box">
-            <div style="font-size:0.75rem; color:#cbd5e1;">Total Pukulan</div>
-            <div class="stat-num" id="statPukul">0</div>
-          </div>
-          <div class="stat-box">
-            <div style="font-size:0.75rem; color:#cbd5e1;">Total Tendangan</div>
-            <div class="stat-num" id="statTendang">0</div>
-          </div>
-          <div class="stat-box">
-            <div style="font-size:0.75rem; color:#cbd5e1;">Total Bantingan</div>
-            <div class="stat-num" id="statBanting">0</div>
-          </div>
+          <div class="stat-box"><div style="font-size:0.75rem; color:#cbd5e1;">Pukulan</div><div class="stat-num" id="statPukul">0</div></div>
+          <div class="stat-box"><div style="font-size:0.75rem; color:#cbd5e1;">Tendangan</div><div class="stat-num" id="statTendang">0</div></div>
+          <div class="stat-box"><div style="font-size:0.75rem; color:#cbd5e1;">Bantingan</div><div class="stat-num" id="statBanting">0</div></div>
         </div>
 
         <div class="manual-controls-grid">
           <div class="ctrl-panel" style="border-color:rgba(239,68,68,0.5);">
-            <div style="font-size:0.78rem; color:#f87171; font-weight:bold;">🎮 Kontrol Jurus Merah:</div>
+            <div style="font-size:0.78rem; color:#f87171; font-weight:bold;">🎮 Kontrol Merah:</div>
             <div class="action-btns">
-              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'pukul')">👊 Pukulan (+1)</button>
-              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tendang')">🦵 Tendangan (+2)</button>
-              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'banting')">🤼 Bantingan (+3)</button>
-              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tangkis')">🛡️ Tangkisan</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'pukul')">👊 Pukul (+1)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tendang')">🦵 Tendang (+2)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'banting')">🤼 Banting (+3)</button>
+              <button class="btn-skill btn-skill-red" onclick="eksekusiJurus3D('merah', 'tangkis')">🛡️ Tangkis</button>
             </div>
           </div>
           <div class="ctrl-panel" style="border-color:rgba(59,130,246,0.5);">
-            <div style="font-size:0.78rem; color:#60a5fa; font-weight:bold;">🎮 Kontrol Jurus Biru:</div>
+            <div style="font-size:0.78rem; color:#60a5fa; font-weight:bold;">🎮 Kontrol Biru:</div>
             <div class="action-btns">
-              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'pukul')">👊 Pukulan (+1)</button>
-              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tendang')">🦵 Tendangan (+2)</button>
-              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'banting')">🤼 Bantingan (+3)</button>
-              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tangkis')">🛡️ Tangkisan</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'pukul')">👊 Pukul (+1)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tendang')">🦵 Tendang (+2)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'banting')">🤼 Banting (+3)</button>
+              <button class="btn-skill btn-skill-blue" onclick="eksekusiJurus3D('biru', 'tangkis')">🛡️ Tangkis</button>
             </div>
           </div>
         </div>
 
         <div class="log-combat" id="logCombat">
-          [Arena 3D Aktif] Model 3D dilengkapi animasi kontraksi otot (hipertrofi) real-time sesuai setoran lari atlet!
+          [Arena 3D Aktif] Model 3D dilengkapi animasi kontraksi otot real-time sesuai setoran lari atlet!
         </div>
       </div>
     </div>
 
-    <!-- TAB 3: INPUT SETORAN -->
+    <!-- TAB 3: PERLENGKAPAN & KESEHATAN ATLET -->
+    <div id="tab-perlengkapan" class="section">
+      <!-- ATURAN PAKAIAN PERTANDINGAN (TANDING & SENI) -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">🥋 Aturan Resmi Pakaian Pertandingan & Kategori Seni (PERSILAT / IPSI)</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Ketentuan seragam, atribut, aksesoris, serta aturan riasan bagi pesilat kategori Tanding maupun kategori Jurus/Seni (Tunggal, Tunggal Bebas, Ganda, dan Regu).</p>
+
+        <div class="info-grid" style="margin-bottom: 18px;">
+          <div class="info-card" style="border-left-color: #ef4444;">
+            <h4 style="color: #fca5a5;">1. Pakaian Kategori Tanding</h4>
+            <ul>
+              <li><strong>Warna & Model:</strong> Wajib mengenakan pakaian Pencak Silat model standar warna <strong>hitam</strong> dengan sabuk putih lebar 10 cm (dililit tanpa simpul menjuntai berlebihan).</li>
+              <li><strong>Panjang Lengan & Celana:</strong> Panjang lengan baju minimal sampai pertengahan lengan bawah (tidak digulung) dan panjang celana minimal menutup betis hingga di atas mata kaki.</li>
+              <li><strong>Badge & Identitas:</strong> Badge IPSI di dada sebelah kiri, badge perguruan di dada kanan (opsional), serta nama negara/kontingen di bagian punggung.</li>
+              <li><strong>Penanda Sudut:</strong> Mengenakan sabuk/ikat pinggang penanda sudut (<strong>Merah</strong> atau <strong>Biru</strong>) di atas sabuk putih, serta <em>body protector</em> sesuai warna sudut.</li>
+              <li><strong>Kerudung / Hijab (Putri):</strong> Pesilat putri berhijab wajib mengenakan kerudung hitam polos model sport yang masuk ke dalam kerah baju (tidak terurai keluar) dan tanpa jarum pentul/peniti logam.</li>
+            </ul>
+          </div>
+
+          <div class="info-card" style="border-left-color: #3b82f6;">
+            <h4 style="color: #93c5fd;">2. Pakaian Kategori Jurus / Seni (Tunggal, Ganda, Regu)</h4>
+            <ul>
+              <li><strong>Tunggal Baku & Regu:</strong> Wajib mengenakan pakaian Pencak Silat warna polos (boleh hitam atau warna kontingen yang seragam untuk Regu) dilengkapi <strong>kain samping (jarik/songket)</strong> dan <strong>ikat kepala (udeng/destar)</strong> khas Nusantara.</li>
+              <li><strong>Ganda:</strong> Pakaian Pencak Silat tradisional/kontingen yang serasi dan seragam antara kedua pesilat (warna dan motif kain samping selaras), dilengkapi ikat kepala.</li>
+              <li><strong>Tunggal Bebas (Free Solo):</strong> Diperbolehkan mengenakan busana adat/tradisional Nusantara yang sopan, mencerminkan budaya daerah, serta mendukung keluwesan gerak dan penggunaan senjata.</li>
+              <li><strong>Keseragaman Tim (Ganda & Regu):</strong> Warna baju, celana, kain samping, dan ikat kepala antaranggota pasangan/regu harus seragam dan rapi sejak awal hingga akhir penampilan.</li>
+            </ul>
+          </div>
+
+          <div class="info-card" style="border-left-color: #d4af37;">
+            <h4 style="color: var(--gold-light);">3. Larangan Aksesoris, Logam & Tata Rias</h4>
+            <ul>
+              <li><strong>Benda Keras & Logam:</strong> Dilarang keras memakai cincin, kalung, gelang, anting, jam tangan, jepit rambut logam, atau benda keras lainnya di dalam gelanggang.</li>
+              <li><strong>Kuku & Kebersihan:</strong> Kuku tangan dan kuku kaki wajib dipotong pendek dan rapi demi keselamatan lawan maupun diri sendiri.</li>
+              <li><strong>Aturan Tata Rias (Make-Up):</strong> Pesilat <strong>putra dilarang keras memakai riasan wajah (make-up)</strong> dalam bentuk apa pun. Pesilat <strong>putri</strong> hanya diperbolehkan memakai bedak dan lipstik secara wajar (tidak berlebihan).</li>
+              <li><strong>Alas Kaki:</strong> Seluruh kategori pertandingan (Tanding maupun Seni) dilakukan tanpa alas kaki (bertelanjang kaki di atas matras).</li>
+            </ul>
+          </div>
+
+          <div class="info-card" style="border-left-color: #10b981;">
+            <h4 style="color: #6ee7b7;">4. Pakaian Saat Timbang Badan</h4>
+            <ul>
+              <li><strong>Ketentuan Pakaian Timbang:</strong> Pesilat putra dan putri wajib menimbang berat badan dengan mengenakan pakaian tanding Pencak Silat dalam kondisi <strong>kering</strong>, tanpa sabuk, tanpa pelindung kemaluan, dan tanpa pelindung sendi.</li>
+              <li><strong>Tanpa Toleransi Berat:</strong> Penimbangan dilakukan 2 kali (hari pertama pertandingan dan babak semi-final) tanpa ada toleransi kelebihan berat badan sedikit pun.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- TABEL PERBANDINGAN PAKAIAN TANDING VS SENI -->
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Aspek Pakaian</th>
+                <th>Kategori Tanding</th>
+                <th>Kategori Seni (Tunggal / Ganda / Regu)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Warna Baju & Celana</strong></td>
+                <td>Wajib Hitam Standar IPSI</td>
+                <td>Bebas Polos / Tradisional (Seragam untuk Ganda & Regu)</td>
+              </tr>
+              <tr>
+                <td><strong>Kain Samping & Ikat Kepala</strong></td>
+                <td>Tidak digunakan (Dilarang)</td>
+                <td>Wajib digunakan (Kain samping & ikat kepala Nusantara)</td>
+              </tr>
+              <tr>
+                <td><strong>Sabuk & Pelindung</strong></td>
+                <td>Sabuk putih + sabuk sudut (Merah/Biru), Body Protector, Genital & Shin Guard</td>
+                <td>Sabuk kain/ikat pinggang adat tanpa <em>body protector</em></td>
+              </tr>
+              <tr>
+                <td><strong>Kerudung / Hijab Putri</strong></td>
+                <td>Hitam polos masuk ke dalam baju, tanpa jarum/peniti</td>
+                <td>Warna serasi dengan busana, rapi, tanpa jarum/logam tajam</td>
+              </tr>
+              <tr>
+                <td><strong>Tata Rias (Make-Up)</strong></td>
+                <td>Dilarang untuk putra; putri natural/wajar</td>
+                <td>Putra dilarang memakai make-up; putri hanya bedak & lipstik wajar</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STANDAR PERLENGKAPAN PERTANDINGAN -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">🛡️ Standar Perlengkapan Pelindung Pertandingan (IPSI / PERSILAT)</div>
+        <div class="info-grid">
+          <div class="info-card">
+            <h4>1. Pelindung Badan (Body Protector)</h4>
+            <p>Wajib berstandar resmi IPSI/PERSILAT berwarna hitam dengan penanda sudut Merah/Biru untuk meredam benturan di area dada, perut, rusuk, dan punggung.</p>
+          </div>
+          <div class="info-card">
+            <h4>2. Pelindung Kemaluan (Genital Protector)</h4>
+            <p>Wajib dipakai di dalam celana tanding (baik putra maupun putri) berbahan plastik/fiber standar guna melindungi area vital dari benturan tidak sengaja.</p>
+          </div>
+          <div class="info-card">
+            <h4>3. Pelindung Tulang Kering & Sendi</h4>
+            <p>Menggunakan <em>shin guard</em> (pelindung tulang kering) berbahan busa/kain elastis tanpa bahan logam/plastik keras, serta deker pelindung lutut/engkel.</p>
+          </div>
+          <div class="info-card">
+            <h4>4. Senjata Kategori Jurus (Seni)</h4>
+            <p>Tunggal Baku & Regu menggunakan golok/parang logam tumpul dan toya rotan standar; Tunggal Bebas & Ganda dapat memakai senjata Nusantara sesuai standar ukuran resmi.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANDUAN KESEHATAN -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom: 12px;">🏥 Panduan Kesehatan, Keselamatan & Pemulihan Atlet</div>
+        <div class="info-grid">
+          <div class="info-card">
+            <h4>1. Penanganan Cedera (R.I.C.E)</h4>
+            <p>Jika terjadi cedera ringan:</p>
+            <ul>
+              <li><strong>Rest:</strong> Istirahatkan area yang cedera.</li>
+              <li><strong>Ice:</strong> Kompres es selama 15–20 menit.</li>
+              <li><strong>Compression:</strong> Balut elastis untuk mengurangi bengkak.</li>
+              <li><strong>Elevation:</strong> Posisikan bagian cedera lebih tinggi dari jantung.</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h4>2. Nutrisi Pemulihan Otot</h4>
+            <p>Konsumsi protein tinggi (dada ayam, telur, tempe) & karbohidrat kompleks (nasi merah, ubi) maksimal 2 jam pasca-latihan.</p>
+          </div>
+          <div class="info-card">
+            <h4>3. Hidrasi & Elektrolit</h4>
+            <p>Minum air putih berkala sebelum, selama, dan sesudah latihan lari/tanding mencegah kram otot.</p>
+          </div>
+          <div class="info-card">
+            <h4>4. Pemanasan & Pendinginan</h4>
+            <p>Wajib pemanasan dinamis sebelum laga dan pendinginan (<em>stretching</em>) setelah selesai untuk merilekskan otot.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: INPUT SETORAN -->
     <div id="tab-setoran" class="section">
       <div class="card">
         <div class="card-title" style="margin-bottom: 14px;">🏃 Setor Progres Lari & Screenshot Strava</div>
@@ -640,7 +643,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: LIST BERAT BADAN -->
+    <!-- TAB 5: LIST BERAT BADAN -->
     <div id="tab-berat" class="section">
       <div class="card">
         <div class="card-header">
@@ -670,10 +673,196 @@
       </div>
     </div>
 
-    <!-- TAB 5: STANDAR KELAS & ATURAN -->
+    <!-- TAB KUIS SILAT -->
+    <div id="tab-kuis" class="section">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧠 Kuis Interaktif Pencak Silat (Soal Acak / Random)</span>
+          <button class="btn btn-outline" onclick="mulaiKuis()" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 0.78rem;">🔀 Acak Soal Baru</button>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Uji wawasan Anda seputar peraturan resmi IPSI, sistem penilaian juri, pelanggaran, teknik tanding, perlengkapan, serta kesehatan & pemulihan atlet. Setiap sesi menyajikan 5 soal acak!</p>
+        
+        <div id="quiz-container">
+          <div id="question-box" style="margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span id="quiz-category" class="badge badge-lapis1">Kategori</span>
+              <span id="quiz-progress" style="color: var(--gold-light); font-size: 0.82rem; font-weight: 600;">Soal 1 dari 5</span>
+            </div>
+            <h3 id="question-title" style="color: #f8fafc; font-size: 1.08rem; line-height: 1.5; margin-bottom: 14px;">Memuat pertanyaan...</h3>
+            <div id="options-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+          
+          <div id="quiz-feedback" style="margin-bottom: 18px; padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; line-height: 1.5; display: none;"></div>
+          
+          <div style="display: flex; justify-content: flex-end;">
+            <button id="btnNextQuiz" class="btn btn-primary" onclick="lanjutPertanyaan()" style="display: none; width: auto; padding: 10px 20px;">Soal Berikutnya ➡️</button>
+          </div>
+        </div>
+
+        <div id="quiz-result" style="display: none; text-align: center; padding: 20px 10px;">
+          <h3 style="color: var(--gold-light); font-size: 1.3rem; margin-bottom: 10px;">🎉 Sesi Kuis Selesai!</h3>
+          <p id="quiz-score-text" style="font-size: 1rem; color: #f8fafc; line-height: 1.6; margin-bottom: 20px;"></p>
+          <button class="btn btn-primary" onclick="mulaiKuis()" style="max-width: 240px; margin: 0 auto;">🔀 Mainkan Soal Acak Baru</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: STANDAR KELAS & ATURAN -->
     <div id="tab-aturan" class="section">
       <div class="card">
-        <div class="card-title" style="margin-bottom: 12px;">📋 Standar Kelas Berat Badan (Peraturan Pencak Silat)</div>
+        <div class="card-title" style="margin-bottom: 12px;">🚨 Klasifikasi Lengkap Pelanggaran & Sanksi Wasit (PERSILAT 2026)</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Panduan komprehensif seluruh jenis pelanggaran kategori Tanding & Jurus serta tahapan hukuman resmi dari Wasit dan Dewan Juri sesuai regulasi PERSILAT 2026.</p>
+
+        <!-- Ringkasan Sanksi -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px;">
+          <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; border-radius: 10px; padding: 12px;">
+            <div style="color: #fcd34d; font-weight: 800; font-size: 0.9rem; margin-bottom: 4px;">⚠️ Pelanggaran Ringan</div>
+            <div style="font-size: 0.8rem; color: #e2e8f0; line-height: 1.4;">Sanksi: <strong>Teguran Lisan / Binaan I & II</strong>. Jika diulang pada babak yang sama berlanjut ke Teguran I (-1 poin).</div>
+          </div>
+          <div style="background: rgba(249, 115, 22, 0.14); border: 1px solid #f97316; border-radius: 10px; padding: 12px;">
+            <div style="color: #fdba74; font-weight: 800; font-size: 0.9rem; margin-bottom: 4px;">🟠 Pelanggaran Sedang</div>
+            <div style="font-size: 0.8rem; color: #e2e8f0; line-height: 1.4;">Sanksi: Langsung <strong>Teguran I (-1 poin)</strong>, pengulangan menjadi <strong>Teguran II (-2 poin)</strong>, lalu Peringatan I (-5 poin).</div>
+          </div>
+          <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 12px;">
+            <div style="color: #fca5a5; font-weight: 800; font-size: 0.9rem; margin-bottom: 4px;">🛑 Pelanggaran Berat</div>
+            <div style="font-size: 0.8rem; color: #e2e8f0; line-height: 1.4;">Sanksi: Langsung <strong>Peringatan I (-5 poin)</strong>, <strong>Peringatan II (-10 poin)</strong>, atau langsung <strong>Diskualifikasi</strong>.</div>
+          </div>
+        </div>
+
+        <div class="info-grid" style="margin-bottom: 24px;">
+          <!-- 1. PELANGGARAN RINGAN -->
+          <div class="info-card" style="border-left-color: #f59e0b;">
+            <h4 style="color: #fcd34d;">1. Pelanggaran Ringan (Sanksi: Binaan)</h4>
+            <ul>
+              <li><strong>Keluar Gelanggang:</strong> Kedua kaki pesilat keluar dari garis batas gelanggang secara sengaja atau tanpa dorongan sah lawan saat pertandingan berlangsung.</li>
+              <li><strong>Pasif / Mengulur Waktu:</strong> Tidak melakukan inisiatif serangan atau pembelaan aktif selama lebih dari 10 detik, atau sengaja memperlambat tempo laga.</li>
+              <li><strong>Membelakangi Lawan:</strong> Berbalik arah hingga membelakangi lawan untuk menghindari serangan atau menghentikan kontak laga.</li>
+              <li><strong>Pasangan Rendah Berbahaya:</strong> Melakukan sikap pasang rendah/jongkok dalam jarak serang langsung lawan tanpa teknik lanjutan.</li>
+              <li><strong>Feinting (Gerakan Tipuan) Tangan ke Wajah:</strong> Mengarahkan tangan terbuka (5 jari terbuka) atau gerakan tipuan mencolok ke arah wajah/mata lawan dalam jarak dekat.</li>
+              <li><strong>Ambilan Kaki Langsung Saat di Matras:</strong> Menangkap atau memegang kaki lawan secara langsung dengan tangan ketika kaki lawan masih menapak di matras (bukan hasil tangkapan tendangan).</li>
+              <li><strong>Kaidah & Etika Ringan:</strong> Tidak melakukan sikap pasang atau pola langkah sebelum menyerang, bersuara teriak berlebihan saat menyerang, atau tidak segera kembali ke sudut setelah aba-aba <em>"Berhenti"</em>.</li>
+              <li><strong>Perlengkapan Terlepas:</strong> Sabuk atau pelindung terlepas/tidak rapi berulang kali karena kelalaian pemakaian.</li>
+            </ul>
+          </div>
+
+          <!-- 2. PELANGGARAN SEDANG -->
+          <div class="info-card" style="border-left-color: #f97316;">
+            <h4 style="color: #fdba74;">2. Pelanggaran Sedang (Sanksi: Teguran -1 / -2 Poin)</h4>
+            <ul>
+              <li><strong>Memegang Pakaian / Body Protector:</strong> Menarik, mencengkeram, atau memegang baju tanding, celana, maupun <em>body protector</em> lawan saat menyerang atau bertahan.</li>
+              <li><strong>Menarik Kerudung / Hijab:</strong> Menarik atau memegang kerudung lawan dari arah manapun baik sengaja maupun tidak sengaja saat proses pergumulan/tangkapan.</li>
+              <li><strong>Merangkul / Menggumul (Clinching):</strong> Merangkul tubuh, leher, atau lengan lawan secara berlebihan untuk mengunci pergerakan tanpa diikuti teknik jatuhan sah dalam batas waktu ketentuan.</li>
+              <li><strong>Tarikan Langsung Tanpa Serangan:</strong> Melakukan tarikan langsung terhadap badan atau lengan lawan tanpa didahului serangan/tangkisan yang sah.</li>
+              <li><strong>Counter Attack Jatuhan Terlarang:</strong> Melakukan teknik jatuhan balasan yang membahayakan sendi atau dilakukan setelah aba-aba wasit.</li>
+              <li><strong>Dorongan Berlebihan:</strong> Mendorong lawan keluar gelanggang menggunakan kedua tangan atau bahu tanpa teknik serangan sah.</li>
+              <li><strong>Mengulangi Pelanggaran Ringan:</strong> Melakukan pelanggaran ringan yang sama untuk ketiga kalinya dalam satu babak setelah menerima Binaan I dan Binaan II.</li>
+            </ul>
+          </div>
+
+          <!-- 3. PELANGGARAN BERAT -->
+          <div class="info-card" style="border-left-color: #ef4444;">
+            <h4 style="color: #fca5a5;">3. Pelanggaran Berat (Sanksi: Peringatan -5 / -10 & Diskualifikasi)</h4>
+            <ul>
+              <li><strong>Menyerang Sasaran Terlarang:</strong> Menyerang dengan sengaja ke bagian <strong>kepala, wajah, leher, tenggorokan, tulang belakang, atau kemaluan</strong>.</li>
+              <li><strong>Menyerang Persendian Lutut & Paha Langsung:</strong> Melakukan tendangan atau injakan langsung ke arah persendian lutut, atau serangan tunggal langsung ke paha tanpa awalan/akhiran teknik yang sah.</li>
+              <li><strong>Teknik Bantingan / Kuncian Berbahaya:</strong> Membanting lawan dengan posisi kepala membentur matras terlebih dahulu (<em>spiking</em>), mengunci sendi secara paksa, atau mencekik.</li>
+              <li><strong>Menyerang Setelah Aba-aba "Berhenti":</strong> Tetap melepaskan pukulan, tendangan, atau jatuhan setelah wasit menghentikan pertandingan atau bunyi gong akhir babak.</li>
+              <li><strong>Tindakan Tidak Sportif & Kekerasan Ekstrem:</strong> Menggigit, mencakar, meludahi, menyundul dengan kepala, memukul dengan siku/lutut secara terlarang, atau memprovokasi/menghina wasit dan penonton.</li>
+              <li><strong>Menyebabkan Lawan Cedera Berat:</strong> Pelanggaran yang mengakibatkan lawan tidak dapat melanjutkan pertandingan berdasarkan keputusan Dokter Pertandingan berujung pada <strong>Diskualifikasi langsung</strong>.</li>
+            </ul>
+          </div>
+
+          <!-- 4. PELANGGARAN KATEGORI JURUS (SENI) -->
+          <div class="info-card" style="border-left-color: #3b82f6;">
+            <h4 style="color: #93c5fd;">4. Pelanggaran & Penalti Kategori Jurus (Tunggal, Ganda, Regu)</h4>
+            <ul>
+              <li><strong>Melebihi Toleransi Waktu:</strong> Penampilan melebihi atau kurang dari batas waktu (toleransi ±5 detik untuk Remaja/Dewasa, ±10 detik untuk Usia Dini/Pra-Remaja) dikenakan pemotongan nilai bertahap hingga diskualifikasi jika melebihi 15-20 detik.</li>
+              <li><strong>Menahan Gerakan (Freeze):</strong> Berhenti atau menahan posisi gerakan lebih dari 5 detik dikenakan penalti pengurangan nilai <strong>-0,50</strong> oleh Dewan Juri.</li>
+              <li><strong>Keluar Garis Gelanggang (Seni):</strong> Setiap kali kaki keluar dari batas matras pertandingan dikenakan pemotongan nilai <strong>-0,50</strong>.</li>
+              <li><strong>Senjata Terlepas / Patah / Jatuh:</strong> Senjata jatuh menyentuh matras saat peragaan dikenakan penalti <strong>-0,50</strong>; jika senjata patah atau tidak sesuai standar ukuran PERSILAT dapat berujung diskualifikasi.</li>
+              <li><strong>Aturan Tata Rias & Pakaian:</strong> Pesilat putra dilarang keras memakai riasan wajah (<em>make-up</em>); pesilat putri hanya diperbolehkan memakai bedak dan lipstik secara wajar.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- TABEL URUTAN HUKUMAN WASIT -->
+        <div class="card-title" style="margin-bottom: 10px; margin-top: 10px;">⚖️ Matriks Urutan Hukuman & Pengurangan Poin Wasit</div>
+        <div class="table-responsive" style="margin-bottom: 24px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tingkat Hukuman</th>
+                <th>Pemicu Pelanggaran</th>
+                <th>Konsekuensi Poin</th>
+                <th>Keterangan & Berlaku</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Binaan I & II</strong></td>
+                <td>Pelanggaran Ringan ke-1 & ke-2</td>
+                <td><span class="badge badge-ok">0 Poin</span></td>
+                <td>Berlaku per babak (di-reset saat ganti babak)</td>
+              </tr>
+              <tr>
+                <td><strong>Teguran I</strong></td>
+                <td>Pelanggaran Ringan ke-3 (1 babak) atau Pelanggaran Sedang ke-1</td>
+                <td><span class="badge badge-warn">-1 Poin</span></td>
+                <td>Berlaku per babak (di-reset saat ganti babak)</td>
+              </tr>
+              <tr>
+                <td><strong>Teguran II</strong></td>
+                <td>Pengulangan pelanggaran setelah Teguran I pada babak yang sama</td>
+                <td><span class="badge badge-warn">-2 Poin</span></td>
+                <td>Berlaku per babak (di-reset saat ganti babak)</td>
+              </tr>
+              <tr>
+                <td><strong>Peringatan I</strong></td>
+                <td>Pelanggaran Berat ke-1 atau lanjutan setelah Teguran II</td>
+                <td><span class="badge badge-over">-5 Poin</span></td>
+                <td>Akumulatif sepanjang seluruh babak pertandingan</td>
+              </tr>
+              <tr>
+                <td><strong>Peringatan II</strong></td>
+                <td>Pelanggaran Berat ke-2 atau pengulangan setelah Peringatan I</td>
+                <td><span class="badge badge-over">-10 Poin</span></td>
+                <td>Akumulatif; satu pelanggaran berat lagi = Diskualifikasi</td>
+              </tr>
+              <tr>
+                <td><strong>Diskualifikasi</strong></td>
+                <td>Pelanggaran setelah Peringatan II, atau Pelanggaran Berat fatal/cedera</td>
+                <td><span class="badge badge-over">Gugur / Kalah</span></td>
+                <td>Lawan dinyatakan menang mutlak (Diskualifikasi)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RINGKASAN ATURAN PERTANDINGAN & VAR -->
+        <div class="card-title" style="margin-bottom: 12px;">📋 Peraturan Umum Kategori, Durasi & VAR (PERSILAT 2026)</div>
+        <div class="info-grid" style="margin-bottom: 20px;">
+          <div class="info-card">
+            <h4>Kategori Pertandingan & Timbang Badan</h4>
+            <p><strong>Kategori Tanding:</strong> Duel 2 pesilat (Sudut Merah & Biru) menerapkan unsur serangan, pembelaan, kaidah, dan jatuhan.</p>
+            <p style="margin-top: 6px;"><strong>Kategori Jurus:</strong> Tunggal Baku, Tunggal Bebas (17 senjata Nusantara), Ganda, dan Regu.</p>
+            <p style="margin-top: 6px;"><strong>Timbang Badan:</strong> Dilakukan 2 kali (hari pertama & semi-final) tanpa toleransi berat badan.</p>
+          </div>
+          <div class="info-card">
+            <h4>Durasi Tanding & Aturan WMP</h4>
+            <p>• <strong>Singa, Macan, Usia Dini:</strong> 3 ronde x 1 menit 30 detik (istirahat 1 menit).</p>
+            <p>• <strong>Pra-Remaja, Remaja, Dewasa:</strong> 3 ronde x 2 menit (istirahat 1 menit).</p>
+            <p>• <strong>Master A & B:</strong> 2 ronde x 1 menit 30 detik / 1 menit.</p>
+            <p style="margin-top: 6px;"><strong>WMP (Referee Stop Contest):</strong> Laga dihentikan jika selisih skor mencapai 30 poin (Remaja/Dewasa) atau 20 poin (Pra-Remaja) selambat-lambatnya 1 menit akhir babak ke-2.</p>
+          </div>
+          <div class="info-card">
+            <h4>Prosedur Protes & VAR</h4>
+            <p>• <strong>Tanding:</strong> Pelatih memiliki 2 kali hak protes VAR memakai kartu protes. Jika diterima, kartu dikembalikan.</p>
+            <p style="margin-top: 6px;">• <strong>Jurus:</strong> 1 kartu protes per penampilan sebelum pengumuman pemenang.</p>
+            <p style="margin-top: 6px;">• <strong>Banding Manajer:</strong> Banding resmi ke Delegasi Teknik dikenakan biaya administrasi USD 200–300.</p>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-bottom: 12px; margin-top: 20px;">⚖️ Standar Kelas Berat Badan (Peraturan PERSILAT 2026)</div>
         <div class="table-responsive">
           <table>
             <thead>
@@ -706,17 +895,7 @@
       </div>
     </div>
 
-  </div>
-
-  <footer>
-    <p>📱 Ikuti Informasi Resmi Perguruan & Tim Kami di Instagram:</p>
-    <div class="ig-links">
-      <a href="https://www.instagram.com/ppssmi_satu.tigaraksa?cplk=MmQzbWwxNHljaG0z" target="_blank">📸 Satu Tigaraksa</a>
-      <a href="https://www.instagram.com/pencaksilatsman6?dlrf=OGdkMWd6enI5a21m" target="_blank">📸 Pencak Silat SMAN 6 Kab. Tangerang</a>
-    </div>
-  </footer>
-
-  <!-- MODAL GRAFIK DETAIL -->
+    <!-- MODAL GRAFIK DETAIL -->
   <div class="modal" id="modalGrafik">
     <div class="modal-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-gold); padding-bottom: 10px;">
@@ -796,7 +975,6 @@
     let chartMingguanInstance = null;
     let chartRamadhanInstance = null;
 
-    // VARIABEL THREE.JS 3D, ANIMASI OTOT & WASIT
     let scene, camera, renderer, controls;
     let fighterRed, fighterBlue;
     let is3DInitialized = false;
@@ -833,6 +1011,39 @@
       }
     }
 
+    /* ================= EKSPOR REKAPITULASI KE EXCEL/CSV ================= */
+    function eksporRekapExcel() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "No,Nama Atlet,Tim,Kategori,Kelas,Berat Badan (kg),Total Lari Mingguan (KM),Total Lari Ramadhan (KM)\r\n";
+
+      INITIAL_ATHLETES.forEach((a, index) => {
+        const d = window.appData[a.id] || { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null };
+        const totalMingguan = (d.mingguan || [0,0,0,0]).reduce((acc, v) => acc + v, 0).toFixed(2);
+        const totalRamadhan = (d.ramadhan || [0,0,0,0]).reduce((acc, v) => acc + v, 0).toFixed(2);
+        const bb = d.berat !== null ? d.berat : "Belum Diisi";
+
+        const row = [
+          index + 1,
+          `"${a.nama}"`,
+          `"${a.tim}"`,
+          `"${a.kategori}"`,
+          `"${a.kelas}"`,
+          bb,
+          totalMingguan,
+          totalRamadhan
+        ];
+        csvContent += row.join(",") + "\r\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "rekap_latihan_atlet_silat.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     /* ================= INISIALISASI ENGINE 3D & ANIMASI OTOT ================= */
     function initArena3D() {
       const container = document.getElementById('canvas3dContainer');
@@ -865,17 +1076,7 @@
       const mainLight = new THREE.DirectionalLight(0xfff5cc, 1.2);
       mainLight.position.set(5, 12, 6);
       mainLight.castShadow = true;
-      mainLight.shadow.mapSize.width = 2048;
-      mainLight.shadow.mapSize.height = 2048;
       scene.add(mainLight);
-
-      const redLight = new THREE.PointLight(0xef4444, 1.5, 10);
-      redLight.position.set(-4, 3, 2);
-      scene.add(redLight);
-
-      const blueLight = new THREE.PointLight(0x3b82f6, 1.5, 10);
-      blueLight.position.set(4, 3, 2);
-      scene.add(blueLight);
 
       const matrasGeo = new THREE.CylinderGeometry(4.8, 5.0, 0.25, 48);
       const matrasMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.5, metalness: 0.1 });
@@ -890,12 +1091,6 @@
       ring.rotation.x = -Math.PI / 2;
       ring.position.y = 0.01;
       scene.add(ring);
-
-      const centerGeo = new THREE.RingGeometry(0.8, 0.9, 32);
-      const centerRing = new THREE.Mesh(centerGeo, ringMat);
-      centerRing.rotation.x = -Math.PI / 2;
-      centerRing.position.y = 0.01;
-      scene.add(centerRing);
 
       const scaleM = hitungSkalaOtot(document.getElementById('selMerah').value);
       const scaleB = hitungSkalaOtot(document.getElementById('selBiru').value);
@@ -937,7 +1132,6 @@
       belt.position.y = 0.9;
       group.add(belt);
 
-      // Torso / Dada dengan referensi skala otot hipertrofi
       const torso = new THREE.Mesh(new THREE.BoxGeometry(0.65 * muscleScale, 0.65, 0.36 * muscleScale), suitMat);
       torso.position.y = 1.3;
       torso.castShadow = true;
@@ -949,12 +1143,7 @@
 
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
       head.position.y = 1.95;
-      head.castShadow = true;
       group.add(head);
-
-      const headband = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.07, 16), new THREE.MeshBasicMaterial({ color: 0xd4af37 }));
-      headband.position.y = 2.0;
-      group.add(headband);
 
       const armGeo = new THREE.BoxGeometry(0.18 * muscleScale, 0.65, 0.18 * muscleScale);
 
@@ -962,20 +1151,16 @@
       leftArmPivot.position.set(-0.45 * muscleScale, 1.55, 0);
       const leftArm = new THREE.Mesh(armGeo, suitMat);
       leftArm.position.y = -0.28;
-      leftArm.castShadow = true;
       leftArmPivot.add(leftArm);
       leftArmPivot.rotation.x = -0.7;
-      leftArmPivot.rotation.z = -0.25;
       group.add(leftArmPivot);
 
       const rightArmPivot = new THREE.Group();
       rightArmPivot.position.set(0.45 * muscleScale, 1.55, 0);
       const rightArm = new THREE.Mesh(armGeo, suitMat);
       rightArm.position.y = -0.28;
-      rightArm.castShadow = true;
       rightArmPivot.add(rightArm);
       rightArmPivot.rotation.x = -0.7;
-      rightArmPivot.rotation.z = 0.25;
       group.add(rightArmPivot);
 
       const legGeo = new THREE.BoxGeometry(0.22 * muscleScale, 0.75, 0.22 * muscleScale);
@@ -984,18 +1169,14 @@
       leftLegPivot.position.set(-0.16, 0.65, 0);
       const leftLeg = new THREE.Mesh(legGeo, suitMat);
       leftLeg.position.y = -0.35;
-      leftLeg.castShadow = true;
       leftLegPivot.add(leftLeg);
-      leftLegPivot.rotation.x = -0.2;
       group.add(leftLegPivot);
 
       const rightLegPivot = new THREE.Group();
       rightLegPivot.position.set(0.16, 0.65, 0);
       const rightLeg = new THREE.Mesh(legGeo, suitMat);
       rightLeg.position.y = -0.35;
-      rightLeg.castShadow = true;
       rightLegPivot.add(rightLeg);
-      rightLegPivot.rotation.x = 0.2;
       group.add(rightLegPivot);
 
       return { group, torso, leftArmPivot, rightArmPivot, leftLegPivot, rightLegPivot, baseScale: muscleScale };
@@ -1016,10 +1197,10 @@
       const pctsB = Math.round((scaleB - 1.0) * 300);
 
       document.getElementById('titleOtotMerah').innerText = `🔴 ${pM.nama}`;
-      document.getElementById('descOtotMerah').innerHTML = `Indeks Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsM}%</strong><br>Daya Ledak Pukulan & Tendangan: <strong>${Math.round(85 + pctsM * 0.4)}%</strong>`;
+      document.getElementById('descOtotMerah').innerHTML = `Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsM}%</strong><br>Daya Ledak: <strong>${Math.round(85 + pctsM * 0.4)}%</strong>`;
 
       document.getElementById('titleOtotBiru').innerText = `🔵 ${pB.nama}`;
-      document.getElementById('descOtotBiru').innerHTML = `Indeks Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsB}%</strong><br>Daya Ledak Pukulan & Tendangan: <strong>${Math.round(85 + pctsB * 0.4)}%</strong>`;
+      document.getElementById('descOtotBiru').innerHTML = `Hipertrofi Otot: <strong style="color:var(--gold-light);">+${pctsB}%</strong><br>Daya Ledak: <strong>${Math.round(85 + pctsB * 0.4)}%</strong>`;
 
       if (is3DInitialized) {
         scene.remove(fighterRed.group);
@@ -1042,15 +1223,11 @@
       const time = Date.now() * 0.005;
 
       if (fighterRed && fighterBlue && !isPaused) {
-        // Animasi pernapasan & denyut otot (kontraksi hipertrofi ringan saat idle)
         const pulseM = 1.0 + Math.sin(time * 3) * 0.03;
         const pulseB = 1.0 + Math.cos(time * 3) * 0.03;
 
         fighterRed.torso.scale.set(pulseM, 1, pulseM);
         fighterBlue.torso.scale.set(pulseB, 1, pulseB);
-
-        fighterRed.group.position.y = Math.sin(time) * 0.04;
-        fighterBlue.group.position.y = Math.cos(time) * 0.04;
       }
 
       if (controls) controls.update();
@@ -1065,35 +1242,26 @@
       renderer.setSize(container.clientWidth, container.clientHeight);
     }
 
-    /* ================= KONTROL WASIT ================= */
+    /* ================= KONTROL WASIT & JURUS ================= */
     function aksiWasit(sudut, jenis) {
       const logEl = document.getElementById('logCombat');
-      const namaMerah = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
-      const namaBiru = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
-      const namaAktor = sudut === 'merah' ? `🔴 ${namaMerah}` : `🔵 ${namaBiru}`;
+      const namaM = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
+      const namaB = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
+      const aktor = sudut === 'merah' ? `🔴 ${namaM}` : `🔵 ${namaB}`;
 
       if (jenis === 'binaan') {
         if (sudut === 'merah') warnM++; else warnB++;
-        logEl.innerHTML += `🚩 <strong>WASIT:</strong> Memerintahkan <strong>Binaan</strong> kepada ${namaAktor}!<br>`;
+        logEl.innerHTML += `🚩 <strong>WASIT:</strong> Memerintahkan <strong>Binaan</strong> kepada ${aktor}!<br>`;
       } else if (jenis === 'peringatan') {
-        if (sudut === 'merah') {
-          warnM++;
-          skorM = Math.max(0, skorM - 5);
-          document.getElementById('skorMerah').innerText = skorM;
-        } else {
-          warnB++;
-          skorB = Math.max(0, skorB - 5);
-          document.getElementById('skorBiru').innerText = skorB;
-        }
-        logEl.innerHTML += `🛑 <strong>WASIT:</strong> <strong>Peringatan</strong> diberikan pada ${namaAktor}! (-5 Poin)<br>`;
+        if (sudut === 'merah') { warnM++; skorM = Math.max(0, skorM - 5); document.getElementById('skorMerah').innerText = skorM; }
+        else { warnB++; skorB = Math.max(0, skorB - 5); document.getElementById('skorBiru').innerText = skorB; }
+        logEl.innerHTML += `🛑 <strong>WASIT:</strong> <strong>Peringatan</strong> diberikan pada ${aktor}! (-5 Poin)<br>`;
       } else if (jenis === 'jatuhan') {
         tambahPoin(sudut, 3);
-        logEl.innerHTML += `🤼 <strong>DEWAN JURI:</strong> Disahkan teknik <strong>Jatuhan</strong> untuk ${namaAktor}! (+3 Poin)<br>`;
+        logEl.innerHTML += `🤼 <strong>DEWAN JURI:</strong> Disahkan teknik <strong>Jatuhan</strong> untuk ${aktor}! (+3 Poin)<br>`;
       } else if (jenis === 'diskalifikasi') {
-        logEl.innerHTML += `❌ <strong>WASIT KEPALA:</strong> ${namaAktor} kena <strong>Diskualifikasi (Disuli)</strong>!<br>`;
-        alert(`Pertandingan dihentikan oleh Wasit. Pesilat ${namaAktor} didiskualifikasi.`);
-        clearInterval(matchInterval);
-        clearInterval(timerInterval);
+        logEl.innerHTML += `❌ <strong>WASIT KEPALA:</strong> ${aktor} terkena <strong>Diskualifikasi</strong>!<br>`;
+        alert(`Pertandingan dihentikan. Pesilat ${aktor} didiskualifikasi.`);
       }
 
       document.getElementById('warnMerah').innerText = warnM;
@@ -1104,23 +1272,13 @@
     function togglePauseMatch() {
       isPaused = !isPaused;
       const btn = document.getElementById('btnPause');
-      const logEl = document.getElementById('logCombat');
-      if (isPaused) {
-        btn.innerText = "▶️ Lanjutkan / Resume Laga";
-        logEl.innerHTML += `⏸️ <strong>WASIT:</strong> Menghentikan pertandingan sementara (STOP).<br>`;
-      } else {
-        btn.innerText = "⏸️ Hentikan / Pause Laga";
-        logEl.innerHTML += `▶️ <strong>WASIT:</strong> Memerintahkan pertandingan dimulai kembali.<br>`;
-      }
+      btn.innerText = isPaused ? "▶️ Lanjutkan" : "⏸️ Pause Laga";
     }
 
     function keluarSanksi() {
-      const logEl = document.getElementById('logCombat');
-      logEl.innerHTML += `📢 <strong>WASIT KEPALA:</strong> Memberi aba-aba keras <strong>'BERHENTI'</strong>! Seluruh atlet kembali ke posisi semula.<br>`;
-      logEl.scrollTop = logEl.scrollHeight;
+      document.getElementById('logCombat').innerHTML += `📢 <strong>WASIT:</strong> Aba-aba keras <strong>'BERHENTI'</strong>!<br>`;
     }
 
-    /* ================= EKSEKUSI JURUS & ANIMASI OTOT DINAMIS ================= */
     function eksekusiJurus3D(sudut, jenisJurus) {
       if (!is3DInitialized) initArena3D();
       if (isPaused) return;
@@ -1130,42 +1288,32 @@
       const arah = sudut === 'merah' ? 1 : -1;
       const logEl = document.getElementById('logCombat');
 
-      const namaMerah = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
-      const namaBiru = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
-      const namaAktor = sudut === 'merah' ? `🔴 ${namaMerah}` : `🔵 ${namaBiru}`;
+      const namaM = document.getElementById('selMerah').options[document.getElementById('selMerah').selectedIndex]?.text.split(' (')[0] || "Merah";
+      const namaB = document.getElementById('selBiru').options[document.getElementById('selBiru').selectedIndex]?.text.split(' (')[0] || "Biru";
+      const aktor = sudut === 'merah' ? `🔴 ${namaM}` : `🔵 ${namaB}`;
 
       penyerang.group.position.x = -0.6 * arah;
-      // Efek kontraksi otot membesar saat menyerang
       penyerang.torso.scale.set(1.25, 1.1, 1.25);
 
       if (jenisJurus === 'pukul') {
-        totalPukul++;
-        document.getElementById('statPukul').innerText = totalPukul;
+        totalPukul++; document.getElementById('statPukul').innerText = totalPukul;
         penyerang.rightArmPivot.rotation.x = -Math.PI / 1.8;
         lawan.group.position.x = 1.8 * arah;
         tambahPoin(sudut, 1);
-        logEl.innerHTML += `${namaAktor} melancarkan <strong>Pukulan Lurus</strong> (Kontraksi Otot Puncak)! (+1 Poin)<br>`;
+        logEl.innerHTML += `${aktor} melancarkan <strong>Pukulan</strong>! (+1 Poin)<br>`;
       } else if (jenisJurus === 'tendang') {
-        totalTendang++;
-        document.getElementById('statTendang').innerText = totalTendang;
+        totalTendang++; document.getElementById('statTendang').innerText = totalTendang;
         penyerang.rightLegPivot.rotation.x = -Math.PI / 1.9;
-        penyerang.group.rotation.z = 0.25 * arah;
         lawan.group.position.x = 2.0 * arah;
         tambahPoin(sudut, 2);
-        logEl.innerHTML += `${namaAktor} melepaskan <strong>Tendangan Sabit</strong> (Power Kuadrisep Maksimal)! (+2 Poin)<br>`;
+        logEl.innerHTML += `${aktor} melepaskan <strong>Tendangan</strong>! (+2 Poin)<br>`;
       } else if (jenisJurus === 'banting') {
-        totalBanting++;
-        document.getElementById('statBanting').innerText = totalBanting;
-        penyerang.group.position.y = 0.2;
+        totalBanting++; document.getElementById('statBanting').innerText = totalBanting;
         lawan.group.rotation.z = -Math.PI / 2.2 * arah;
-        lawan.group.position.y = 0.25;
         tambahPoin(sudut, 3);
-        logEl.innerHTML += `${namaAktor} sukses melakukan <strong>Teknik Bantingan</strong>! (+3 Poin)<br>`;
+        logEl.innerHTML += `${aktor} sukses <strong>Bantingan</strong>! (+3 Poin)<br>`;
       } else if (jenisJurus === 'tangkis') {
-        penyerang.leftArmPivot.rotation.x = -1.3;
-        penyerang.rightArmPivot.rotation.x = -1.3;
-        penyerang.group.position.x = -1.5 * arah;
-        logEl.innerHTML += `${namaAktor} memasang <strong>Tangkisan Kokoh</strong>!<br>`;
+        logEl.innerHTML += `${aktor} memasang <strong>Tangkisan</strong>.<br>`;
       }
 
       logEl.scrollTop = logEl.scrollHeight;
@@ -1174,27 +1322,17 @@
         penyerang.group.position.set(-1.5 * arah, 0, 0);
         penyerang.group.rotation.z = 0;
         penyerang.rightArmPivot.rotation.x = -0.7;
-        penyerang.leftArmPivot.rotation.x = -0.7;
-        penyerang.rightLegPivot.rotation.x = 0.2;
         penyerang.torso.scale.set(1, 1, 1);
-
         lawan.group.position.set(1.5 * arah, 0, 0);
         lawan.group.rotation.z = 0;
       }, 550);
     }
 
     function tambahPoin(sudut, poin) {
-      if (sudut === 'merah') {
-        skorM += poin;
-        stamB = Math.max(0, stamB - poin * 4);
-      } else {
-        skorB += poin;
-        stamM = Math.max(0, stamM - poin * 4);
-      }
+      if (sudut === 'merah') { skorM += poin; stamB = Math.max(0, stamB - poin * 4); }
+      else { skorB += poin; stamM = Math.max(0, stamM - poin * 4); }
       document.getElementById('skorMerah').innerText = skorM;
       document.getElementById('skorBiru').innerText = skorB;
-      document.getElementById('stamMerah').innerText = stamM;
-      document.getElementById('stamBiru').innerText = stamB;
     }
 
     function mulaiSimulasi3D() {
@@ -1212,17 +1350,14 @@
       document.getElementById('statPukul').innerText = '0';
       document.getElementById('statTendang').innerText = '0';
       document.getElementById('statBanting').innerText = '0';
-      document.getElementById('btnPause').innerText = "⏸️ Hentikan / Pause Laga";
 
-      const idMerah = parseInt(document.getElementById('selMerah').value);
-      const idBiru = parseInt(document.getElementById('selBiru').value);
-      if (idMerah === idBiru) { alert("Pilih dua pesilat berbeda!"); return; }
+      const idM = parseInt(document.getElementById('selMerah').value);
+      const idB = parseInt(document.getElementById('selBiru').value);
+      if (idM === idB) { alert("Pilih dua pesilat berbeda!"); return; }
 
-      const pM = INITIAL_ATHLETES.find(a => a.id === idMerah);
-      const pB = INITIAL_ATHLETES.find(a => a.id === idBiru);
-
-      const logEl = document.getElementById('logCombat');
-      logEl.innerHTML = `<strong>[Pertandingan Resmi Dimulai]</strong> Wasit meniup peluit! Babak 1 • ${pM.nama} vs ${pB.nama}!<br>`;
+      const pM = INITIAL_ATHLETES.find(a => a.id === idM);
+      const pB = INITIAL_ATHLETES.find(a => a.id === idB);
+      document.getElementById('logCombat').innerHTML = `<strong>[Laga Dimulai]</strong> Babak 1 • ${pM.nama} vs ${pB.nama}!<br>`;
 
       timerInterval = setInterval(() => {
         if (isPaused) return;
@@ -1230,52 +1365,31 @@
         let m = Math.floor(sisaDetik / 60);
         let s = sisaDetik % 60;
         document.getElementById('timerRonde').innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-
-        if (sisaDetik <= 0) {
-          if (currentBabak < 3) {
-            currentBabak++;
-            sisaDetik = 180;
-            document.getElementById('infoBabak').innerText = `BABAK ${currentBabak}`;
-            logEl.innerHTML += `<strong>[Istirahat Ronde] Wasit mengumumkan Istirahat Babak ${currentBabak}</strong><br>`;
-          } else {
-            clearInterval(timerInterval);
-            clearInterval(matchInterval);
-            const pemenang = skorM > skorB ? `${pM.nama} (Merah)` : (skorB > skorM ? `${pB.nama} (Biru)` : "Seri");
-            document.getElementById('infoBabak').innerText = `🏆 SELESAI`;
-            logEl.innerHTML += `<hr><strong>🏆 Waktu Habis! Pemenang: ${pemenang}</strong><br>`;
-          }
+        if (sisaDetik <= 0 && currentBabak < 3) {
+          currentBabak++; sisaDetik = 180;
+          document.getElementById('infoBabak').innerText = `BABAK ${currentBabak}`;
         }
       }, 1000);
 
       matchInterval = setInterval(() => {
-        if (isPaused || stamM <= 0 || stamB <= 0) return;
-        const giliranMerah = Math.random() >= 0.5;
-        if (giliranMerah) {
-          eksekusiJurus3D('merah', Math.random() > 0.5 ? 'pukul' : 'tendang');
-        } else {
-          eksekusiJurus3D('biru', Math.random() > 0.5 ? 'pukul' : 'tendang');
-        }
-      }, 2000);
+        if (isPaused) return;
+        if (Math.random() >= 0.5) eksekusiJurus3D('merah', Math.random() > 0.5 ? 'pukul' : 'tendang');
+        else eksekusiJurus3D('biru', Math.random() > 0.5 ? 'pukul' : 'tendang');
+      }, 2200);
     }
 
     function resetSimulasi3D() {
       if (matchInterval) clearInterval(matchInterval);
       if (timerInterval) clearInterval(timerInterval);
-      skorM = 0; skorB = 0; stamM = 100; stamB = 100; warnM = 0; warnB = 0; sisaDetik = 180; currentBabak = 1; isPaused = false;
+      skorM = 0; skorB = 0; sisaDetik = 180; currentBabak = 1;
       document.getElementById('skorMerah').innerText = '0';
       document.getElementById('skorBiru').innerText = '0';
-      document.getElementById('warnMerah').innerText = '0';
-      document.getElementById('warnBiru').innerText = '0';
       document.getElementById('timerRonde').innerText = '03:00';
       document.getElementById('infoBabak').innerText = 'BABAK 1';
-      document.getElementById('statPukul').innerText = '0';
-      document.getElementById('statTendang').innerText = '0';
-      document.getElementById('statBanting').innerText = '0';
-      document.getElementById('btnPause').innerText = "⏸️ Hentikan / Pause Laga";
-      document.getElementById('logCombat').innerHTML = '[Arena 3D Direset] Wasit siap memulai laga baru!';
+      document.getElementById('logCombat').innerHTML = '[Arena Direset] Wasit siap.';
     }
 
-    /* ================= FUNGSI MONITORING ATLET ================= */
+    /* ================= MONITORING ATLET & CLOUD ================= */
     function populateSelects() {
       const selLari = document.getElementById('selectAtletLari');
       const selBerat = document.getElementById('selectAtletBerat');
@@ -1375,6 +1489,7 @@
       const link = document.getElementById('inputStrava').value.trim();
 
       if (isNaN(km) || km <= 0) { alert("Masukkan jarak KM yang valid!"); return; }
+      if (!screenshotBase64) { alert("Wajib menyertakan bukti screenshot hasil lari/Strava untuk memperbarui setoran!"); return; }
 
       if (!window.appData[id]) {
         window.appData[id] = { mingguan: [0,0,0,0], ramadhan: [0,0,0,0], berat: null, riwayat: [] };
@@ -1507,6 +1622,310 @@
     }
 
     function tutupModal() { document.getElementById('modalGrafik').classList.remove('open'); }
+  </script>
+
+
+  <script>
+    const BANK_SOAL_SILAT = [
+      {
+        kategori: "Sejarah & Organisasi",
+        pertanyaan: "Induk organisasi resmi yang menaungi olahraga Pencak Silat di Indonesia adalah...",
+        opsi: [
+          "IPSI (Ikatan Pencak Silat Indonesia)",
+          "KOBI (Komite Beladiri Indonesia)",
+          "PRSI (Persatuan Seluruh Silat Indonesia)",
+          "PASI (Persatuan Atletik Seluruh Indonesia)"
+        ],
+        jawabanBenar: "IPSI (Ikatan Pencak Silat Indonesia)",
+        pembahasan: "IPSI (Ikatan Pencak Silat Indonesia) didirikan pada tanggal 18 Mei 1948 di Surakarta."
+      },
+      {
+        kategori: "Sejarah & Organisasi",
+        pertanyaan: "Organisasi federasi Pencak Silat tingkat internasional yang didirikan pada tahun 1980 adalah...",
+        opsi: [
+          "PERSILAT (Persekutuan Pencak Silat Antarbangsa)",
+          "WKF (World Karate Federation)",
+          "WTF (World Taekwondo Federation)",
+          "IFMA (International Federation of Muaythai)"
+        ],
+        jawabanBenar: "PERSILAT (Persekutuan Pencak Silat Antarbangsa)",
+        pembahasan: "PERSILAT didirikan pada 11 Maret 1980 di Jakarta oleh Indonesia, Singapura, Malaysia, dan Brunei Darussalam."
+      },
+      {
+        kategori: "Penilaian Tanding IPSI",
+        pertanyaan: "Dalam peraturan pertandingan resmi IPSI, berapakah nilai/poin yang diberikan oleh juri jika serangan tangan (pukulan) masuk secara sah ke sasaran?",
+        opsi: [
+          "1 Poin",
+          "2 Poin",
+          "3 Poin",
+          "4 Poin"
+        ],
+        jawabanBenar: "1 Poin",
+        pembahasan: "Serangan tangan (pukulan) yang masuk secara sah pada bidang sasaran bernilai 1 poin."
+      },
+      {
+        kategori: "Penilaian Tanding IPSI",
+        pertanyaan: "Berapakah poin yang diperoleh pesilat apabila berhasil melakukan serangan kaki (tendangan) yang masuk secara sah ke bidang sasaran?",
+        opsi: [
+          "2 Poin",
+          "1 Poin",
+          "3 Poin",
+          "5 Poin"
+        ],
+        jawabanBenar: "2 Poin",
+        pembahasan: "Serangan kaki (tendangan) yang masuk secara sah bernilai 2 poin."
+      },
+      {
+        kategori: "Penilaian Tanding IPSI",
+        pertanyaan: "Berapakah nilai/poin yang disahkan oleh dewan juri jika seorang atlet berhasil melakukan teknik Jatuhan secara sah?",
+        opsi: [
+          "3 Poin",
+          "1 Poin",
+          "2 Poin",
+          "4 Poin"
+        ],
+        jawabanBenar: "3 Poin",
+        pembahasan: "Teknik jatuhan yang berhasil menjatuhkan lawan secara sah diberi nilai 3 poin."
+      },
+      {
+        kategori: "Pelanggaran & Hukuman",
+        pertanyaan: "Jika seorang pesilat mendapatkan sanksi berupa pengurangan -5 poin akibat pelanggaran berat atau teguran keras dari wasit, sanksi tersebut disebut...",
+        opsi: [
+          "Peringatan I",
+          "Binaan I",
+          "Teguran I",
+          "Diskualifikasi"
+        ],
+        jawabanBenar: "Peringatan I",
+        pembahasan: "Peringatan I dari wasit berkonsekuensi pada pengurangan 5 poin (-5 poin), sedangkan Peringatan II dikurangi 10 poin."
+      },
+      {
+        kategori: "Pelanggaran & Hukuman",
+        pertanyaan: "Berapakah pengurangan poin yang diberikan apabila pesilat menerima sanksi Teguran I dari wasit?",
+        opsi: [
+          "-1 Poin",
+          "-2 Poin",
+          "-5 Poin",
+          "0 Poin (tanpa pengurangan)"
+        ],
+        jawabanBenar: "-1 Poin",
+        pembahasan: "Teguran I dikurangi 1 poin (-1), dan Teguran II dikurangi 2 poin (-2)."
+      },
+      {
+        kategori: "Pelanggaran & Hukuman",
+        pertanyaan: "Bagian tubuh manakah yang merupakan bidang sasaran sah untuk diserang dalam kategori Tanding Pencak Silat?",
+        opsi: [
+          "Bagian badan antara leher hingga pinggang (dada, perut, punggung) yang tertutup body protector",
+          "Kepala dan wajah",
+          "Bagian bawah pinggang hingga kemaluan",
+          "Persendian lutut dan leher"
+        ],
+        jawabanBenar: "Bagian badan antara leher hingga pinggang (dada, perut, punggung) yang tertutup body protector",
+        pembahasan: "Bidang sasaran sah adalah toggok (dada, perut, rusuk kiri/kanan, dan punggung), tidak termasuk leher, kepala, dan kemaluan."
+      },
+      {
+        kategori: "Kesehatan & Cedera",
+        pertanyaan: "Apa kepanjangan dari metode penanganan cedera akut universal yang dikenal dengan akronim R.I.C.E?",
+        opsi: [
+          "Rest, Ice, Compression, Elevation",
+          "Run, Ice, Catch, Elevation",
+          "Relax, Injury, Cure, Exercise",
+          "Rotate, Infrared, Care, Energy"
+        ],
+        jawabanBenar: "Rest, Ice, Compression, Elevation",
+        pembahasan: "R.I.C.E singkatan dari Rest (istirahat), Ice (kompres es), Compression (balut tekan), dan Elevation (tinggikan)."
+      },
+      {
+        kategori: "Nutrisi & Pemulihan",
+        pertanyaan: "Manakah kelompok nutrisi makro yang paling esensial dikonsumsi pesilat maksimal 2 jam setelah latihan untuk mendukung pemulihan dan hipertrofi otot?",
+        opsi: [
+          "Protein tinggi dan karbohidrat kompleks",
+          "Lemak jenuh tinggi",
+          "Minuman bersoda dan gula sederhana",
+          "Garam mineral berlebih tanpa air"
+        ],
+        jawabanBenar: "Protein tinggi dan karbohidrat kompleks",
+        pembahasan: "Protein membantu memperbaiki serat otot yang mikro-robek saat latihan, sedangkan karbohidrat memulihkan cadangan glikogen."
+      },
+      {
+        kategori: "Perlengkapan Tanding",
+        pertanyaan: "Apa fungsi utama penggunaan Body Protector standar IPSI dalam pertandingan kategori tanding?",
+        opsi: [
+          "Meredam benturan pada area dada, perut, rusuk, dan punggung",
+          "Melindungi kepala dari tendangan",
+          "Menambah berat badan pesilat saat penimbangan",
+          "Melindungi tulang kering dan pergelangan kaki"
+        ],
+        jawabanBenar: "Meredam benturan pada area dada, perut, rusuk, dan punggung",
+        pembahasan: "Body protector wajib berstandar IPSI untuk melindungi area toggok dari benturan pukulan maupun tendangan."
+      },
+      {
+        kategori: "Kategori & Kelas Tanding",
+        pertanyaan: "Dalam standar kelas tanding kategori Remaja (Putra maupun Putri), berapakah rentang berat badan untuk Kelas D?",
+        opsi: [
+          "> 51 kg sampai 55 kg",
+          "> 47 kg sampai 51 kg",
+          "> 55 kg sampai 59 kg",
+          "> 39 kg sampai 42 kg"
+        ],
+        jawabanBenar: "> 51 kg sampai 55 kg",
+        pembahasan: "Untuk kategori Remaja, Kelas D memiliki batas berat badan di atas 51 kg hingga 55 kg."
+      },
+      {
+        kategori: "Kategori & Kelas Tanding",
+        pertanyaan: "Berapakah rentang berat badan untuk Kelas A kategori Pra Remaja?",
+        opsi: [
+          "30 kg sampai 33 kg",
+          "39 kg sampai 43 kg",
+          "> 33 kg sampai 36 kg",
+          "25 kg sampai 30 kg"
+        ],
+        jawabanBenar: "30 kg sampai 33 kg",
+        pembahasan: "Pada kategori Pra Remaja, Kelas A dimulai dari 30 kg hingga 33 kg (selisih tiap kelas 3 kg)."
+      },
+      {
+        kategori: "Teknik Dasar Silat",
+        pertanyaan: "Sikap dasar menapakkan kaki untuk memperkukuh posisi tubuh agar tidak mudah dijatuhkan lawan saat menyerang maupun bertahan disebut...",
+        opsi: [
+          "Kuda-kuda",
+          "Pasang",
+          "Elakan",
+          "Tangkisan"
+        ],
+        jawabanBenar: "Kuda-kuda",
+        pembahasan: "Kuda-kuda adalah teknik dasar posisi kaki sebagai tumpuan keseimbangan dan kekuatan dalam Pencak Silat."
+      },
+      {
+        kategori: "Peraturan Pertandingan",
+        pertanyaan: "Aba-aba yang diucapkan oleh Wasit untuk memulai atau melanjutkan kembali jalannya pertandingan adalah...",
+        opsi: [
+          "Mulai",
+          "Bersedia",
+          "Sedia",
+          "Serang"
+        ],
+        jawabanBenar: "Mulai",
+        pembahasan: "Wasit menggunakan aba-aba 'Bersedia' untuk persiapan, 'Mulai' untuk memulai laga, dan 'Berhenti' untuk menghentikan sementara."
+      }
+    ];
+
+    let soalSesiIni = [];
+    let soalAktif = 0;
+    let skorKuis = 0;
+    let sudahJawab = false;
+
+    function acakArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function mulaiKuis() {
+      // Ambil 5 soal acak dari bank soal
+      soalSesiIni = acakArray(BANK_SOAL_SILAT).slice(0, 5);
+      soalAktif = 0;
+      skorKuis = 0;
+      sudahJawab = false;
+
+      document.getElementById('quiz-container').style.display = 'block';
+      document.getElementById('quiz-result').style.display = 'none';
+      tampilkanSoal();
+    }
+
+    function tampilkanSoal() {
+      sudahJawab = false;
+      const soal = soalSesiIni[soalAktif];
+      document.getElementById('quiz-category').innerText = soal.kategori;
+      document.getElementById('question-title').textContent = (soalAktif + 1) + ". " + soal.pertanyaan;
+      document.getElementById('quiz-progress').innerText = "Soal " + (soalAktif + 1) + " dari " + soalSesiIni.length;
+      document.getElementById('quiz-feedback').style.display = 'none';
+      document.getElementById('btnNextQuiz').style.display = 'none';
+
+      const optsList = document.getElementById('options-list');
+      optsList.innerHTML = '';
+
+      // Acak urutan pilihan jawaban setiap kali soal tampil
+      const opsiAcak = acakArray(soal.opsi);
+      const huruf = ['A', 'B', 'C', 'D'];
+
+      opsiAcak.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.dataset.value = optText;
+        btn.style.cssText = "text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.35); color: #f8fafc; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500;";
+        btn.innerText = huruf[idx] + ". " + optText;
+        btn.onclick = () => pilihJawaban(optText, btn);
+        optsList.appendChild(btn);
+      });
+    }
+
+    function pilihJawaban(teksPilihan, elBtn) {
+      if (sudahJawab) return;
+      sudahJawab = true;
+      const soal = soalSesiIni[soalAktif];
+      const opts = document.getElementById('options-list').children;
+
+      for (let i = 0; i < opts.length; i++) {
+        opts[i].style.pointerEvents = 'none';
+        const val = opts[i].dataset.value;
+        if (val === soal.jawabanBenar) {
+          opts[i].style.background = 'rgba(16, 185, 129, 0.28)';
+          opts[i].style.borderColor = '#10b981';
+          opts[i].style.color = '#6ee7b7';
+        } else if (val === teksPilihan) {
+          opts[i].style.background = 'rgba(239, 68, 68, 0.28)';
+          opts[i].style.borderColor = '#ef4444';
+          opts[i].style.color = '#fca5a5';
+        }
+      }
+
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.style.display = 'block';
+      if (teksPilihan === soal.jawabanBenar) {
+        skorKuis++;
+        feedback.style.background = 'rgba(16, 185, 129, 0.18)';
+        feedback.style.border = '1px solid #10b981';
+        feedback.style.color = '#6ee7b7';
+        feedback.innerHTML = "<strong>Benar! 🎉</strong> " + soal.pembahasan;
+      } else {
+        feedback.style.background = 'rgba(239, 68, 68, 0.18)';
+        feedback.style.border = '1px solid #ef4444';
+        feedback.style.color = '#fca5a5';
+        feedback.innerHTML = "<strong>Kurang tepat. ❌</strong> Jawaban yang benar adalah <strong>" + soal.jawabanBenar + "</strong>.<br>" + soal.pembahasan;
+      }
+
+      if (soalAktif < soalSesiIni.length - 1) {
+        document.getElementById('btnNextQuiz').style.display = 'inline-block';
+      } else {
+        document.getElementById('btnNextQuiz').style.display = 'none';
+        setTimeout(selesaiKuis, 1600);
+      }
+    }
+
+    function lanjutPertanyaan() {
+      soalAktif++;
+      tampilkanSoal();
+    }
+
+    function selesaiKuis() {
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('quiz-result').style.display = 'block';
+      const persentase = Math.round((skorKuis / soalSesiIni.length) * 100);
+      let pesan = "";
+      if (persentase === 100) pesan = "Luar biasa! Pemahaman Anda tentang aturan & teknik Pencak Silat sangat sempurna! 🥇";
+      else if (persentase >= 80) pesan = "Hebat! Pengetahuan Pencak Silat Anda sangat baik. 🥈";
+      else if (persentase >= 60) pesan = "Bagus! Terus asah wawasan peraturan dan teknik silat Anda. 🥉";
+      else pesan = "Tetap semangat belajar dan berlatih, Pendekar! Coba acak soal lagi untuk berlatih. 💪";
+
+      document.getElementById('quiz-score-text').innerHTML = "Skor Anda: <strong style='color:var(--gold-light); font-size:1.3rem;'>" + skorKuis + " / " + soalSesiIni.length + "</strong> (" + persentase + "%)<br><br>" + pesan;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      mulaiKuis();
+    });
   </script>
 </body>
 </html>
